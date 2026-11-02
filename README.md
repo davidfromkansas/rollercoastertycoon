@@ -19,7 +19,7 @@ Runs use Prime Intellect's [verifiers](https://github.com/PrimeIntellect-ai/veri
 2. The AI (Claude Code by default) gets the prompt (`env/rct_bench/data/PROMPT.md`) and a folder with only the bridge helper. It can't see the bridge's own files, past runs or the goal settings.
 3. The run ends at whichever comes first: the game decides the goal (met, or failed at its deadline) or the time limit (60 real minutes by default).
 4. Score: **1 if the game marks the scenario completed, else 0.** Also recorded: guests, park rating, cash, loan, park value, game months passed, tool calls and web searches.
-5. Kept on your machine: the full video, a 16x video, and the AI's folder plus the final park save.
+5. Kept on your machine: the full video, a 16x video, and the AI's folder plus the final park save. In the video the camera zooms in where the AI is building and back out when it goes quiet.
 
 ## Run it yourself
 

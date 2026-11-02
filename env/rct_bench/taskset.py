@@ -54,6 +54,13 @@ class RctTask(vf.Task[RctData]):
             raise RuntimeError(
                 f"setup failed ({result.exit_code}): {result.stdout[-1000:]} {result.stderr[-1000:]}"
             )
+        # Video camera: zooms in where the AI is building, back out when it is quiet (root only; the AI can't see it).
+        await runtime.write("/root/rec/camera.js", (files("rct_bench") / "camera.js").read_bytes())
+        await runtime.run(
+            ["bash", "-c", f"chmod 700 /root/rec/camera.js; setsid nohup node /root/rec/camera.js {PLAY}/logs "
+             ">/root/rec/camera.log 2>&1 < /dev/null & echo $! > /root/rec/camera.pid"],
+            {},
+        )
         # Optional extra copy of the handbook (data/rct2-guide.md; not in the public repo).
         guide = DATA / "rct2-guide.md"
         if guide.is_file():
@@ -78,6 +85,7 @@ class RctTask(vf.Task[RctData]):
     async def finalize(self, trace: vf.Trace, runtime) -> None:
         RUNTIMES.pop(trace.id, None)
         LAST_CHECK.pop(trace.id, None)
+        await runtime.run(["bash", "-c", "kill $(cat /root/rec/camera.pid 2>/dev/null) 2>/dev/null; true"], {})
         # Pause the game so the score is read from the moment the AI stopped.
         await runtime.run(
             [
