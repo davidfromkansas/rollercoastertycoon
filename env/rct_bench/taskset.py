@@ -68,6 +68,7 @@ class RctTask(vf.Task[RctData]):
         script = (files("rct_bench") / "setup.sh").read_bytes()
         await runtime.write("/tmp/rct-setup.sh", script)
         # Live AI log for the video's side panel (started by setup.sh, root only; the AI can't see it).
+        await runtime.write("/tmp/rct-panel.py", (files("rct_bench") / "panel.py").read_bytes())
         await runtime.write("/tmp/rct-panel.js", (files("rct_bench") / "panel.js").read_bytes())
         info = {"scenario": self.data.scenario, "goal": self.data.goal}
         await runtime.write("/tmp/rct-panel-info.json", json.dumps(info).encode())
