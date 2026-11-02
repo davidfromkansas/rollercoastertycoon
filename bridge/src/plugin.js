@@ -62,7 +62,7 @@
             generation++;
             session = newId();
             plans = Object.create(null);
-            if (typeof history !== 'undefined') { history = []; campaigns = []; }
+            if (typeof history !== 'undefined') { history = []; campaigns = []; firstSeen = {}; }
         }
         context.subscribe('map.change', resetSession);
         context.subscribe('map.changed', resetSession);
@@ -195,6 +195,25 @@
                 'value', 'companyValue', 'suggestedGuestMaximum', 'totalAdmissions', 'totalIncomeFromAdmissions', 'parkSize']);
             // Only the 10 newest messages: old parks can carry hundreds.
             parkView.messages = (park.messages || []).slice(-10).map(m => pick(m, ['type', 'subject', 'text', 'month', 'tickCount', 'isArchived']));
+            // The scenario's own rules, as the game's park window would show them (greyed-out prices etc.).
+            const flag = name => { try { return park.getFlag(name); } catch (e) { return undefined; } };
+            const unlockAll = flag('unlockAllPrices'), freeEntry = flag('freeParkEntry');
+            parkView.rules = {
+                guestsPayEntryFee: unlockAll || !freeEntry,
+                guestsPayForRides: unlockAll || freeEntry,
+                entryFeeCanBeChanged: unlockAll || !freeEntry,
+                ridePricesCanBeChanged: unlockAll || freeEntry,
+                guestsHarderToAttract: flag('difficultGuestGeneration'),
+                parkRatingHarderToRaise: flag('difficultParkRating'),
+                guestsPreferMoreIntenseRides: flag('preferMoreIntenseRides'),
+                guestsPreferLessIntenseRides: flag('preferLessIntenseRides'),
+                marketingForbidden: flag('forbidMarketingCampaigns'),
+                treeRemovalForbidden: flag('forbidTreeRemoval'),
+                landscapeChangesForbidden: flag('forbidLandscapeChanges'),
+                highConstructionForbidden: flag('forbidHighConstruction'),
+                noMoney: flag('noMoney'),
+                parkOpen: flag('open'),
+            };
             const scenarioView = pick(scenario, ['name', 'status']);
             scenarioView.objective = pick(scenario.objective || {}, ['type', 'guests', 'year', 'length', 'excitement', 'parkValue', 'monthlyIncome']);
             return {
@@ -229,6 +248,8 @@
                         Object.assign(view, pick(e, ['toilet', 'favouriteRide', 'minIntensity', 'maxIntensity', 'nauseaTolerance', 'isInPark', 'isLost']));
                         view.items = (e.items || []).map(i => i.type);
                         try { view.tracking = e.getFlag('tracking'); } catch (err) { /* optional */ }
+                        // Game date this guest was first seen inside the park (checked once a game day since the bridge started).
+                        if (firstSeen[e.id]) view.inParkSince = firstSeen[e.id];
                     } else {
                         Object.assign(view, pick(e, ['orders', 'costume', 'lawnsMown', 'gardensWatered', 'litterSwept', 'binsEmptied',
                             'ridesFixed', 'ridesInspected', 'vandalsStopped']));
@@ -410,11 +431,22 @@
         // The game keeps no history the plugin can read, so the bridge writes down the numbers every game day.
         const MAX_HISTORY = 2000;
         let history = [];
+        let firstSeen = {};
         context.subscribe('interval.day', () => {
             try {
                 history.push({ monthsElapsed: date.monthsElapsed, day: date.day, cash: park.cash, rating: park.rating,
                     guests: park.guests, parkValue: park.value, companyValue: park.companyValue });
                 if (history.length > MAX_HISTORY) history = history.slice(-MAX_HISTORY);
+            } catch (e) { /* never break the game for a log */ }
+            // The game doesn't tell plugins how long a guest has been in the park, so note the day each guest is first seen inside.
+            try {
+                const today = { monthsElapsed: date.monthsElapsed, day: date.day };
+                const now = {};
+                for (const g of map.getAllEntities('guest')) {
+                    if (!g.isInPark) continue;
+                    now[g.id] = firstSeen[g.id] || today;
+                }
+                firstSeen = now;
             } catch (e) { /* never break the game for a log */ }
         });
         function readHistory(a) {
@@ -622,7 +654,7 @@
                 receipt.state = 'completed';
             } catch (e) {
                 receipt.state = 'outcome_unknown';
-                receipt.detail = String(e);
+                receipt.failure = String(e);
             }
             saveReceipts();
             reply({ id: req.id, ok: true, result: receipt });
@@ -664,9 +696,11 @@
             saveReceipts();
             busy = true;
 
+            // What happened goes in its own field: `summary` when every step was done, `failure` (why it stopped) otherwise.
             function finish(state, detail) {
                 receipt.state = state;
-                receipt.detail = detail;
+                if (state === 'completed') receipt.summary = detail;
+                else receipt.failure = detail;
                 receipt.finishedAt = Date.now();
                 busy = false;
                 try {

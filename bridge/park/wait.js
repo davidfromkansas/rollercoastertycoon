@@ -1,6 +1,7 @@
 // Lets the game run and returns only at the end of a game year, on an alert (including any red game warning), or after a time limit.
 // Prints new game messages as they arrive.
-// Usage: node wait.js [--max-minutes 9] [--cash-floor 1000]
+// Usage: node wait.js [--max-minutes 1.75] [--cash-floor 1000]
+// The default stops before 2 real minutes, so it finishes inside a command's usual 2-minute limit.
 // Prints one line per game month seen while waiting, then why it stopped.
 'use strict';
 const crypto = require('node:crypto');
@@ -11,7 +12,7 @@ const option = (name, fallback) => {
     const i = argv.indexOf(name);
     return i >= 0 && argv[i + 1] !== undefined ? Number(argv[i + 1]) : fallback;
 };
-const maxMs = option('--max-minutes', 9) * 60000;
+const maxMs = option('--max-minutes', 1.75) * 60000;
 const cashFloor = option('--cash-floor', 1000);  // in £, the game counts money in tenths (10 = £1)
 
 const MONTHS = ['March', 'April', 'May', 'June', 'July', 'August', 'September', 'October'];

@@ -62,10 +62,10 @@ The panel opens by itself on the first message. Reopen it from the game's menu: 
 | Command | What it does |
 | --- | --- |
 | `node cli.js hello` | Status, API version, session |
-| `node cli.js park` | Money, guests, rating, scenario goal, date |
+| `node cli.js park` | Money, guests, rating, scenario goal, date, and the scenario's fixed rules (`park.rules`: who pays at the gate or per ride, which prices can change, harder guests, intensity preferences, forbidden actions) |
 | `node cli.js rides '{"sortBy":"profit"}'` / `ride '{"ride":3}'` | Ride stats, like the ride list window (sort by any number) |
 | `node cli.js map '{"x":60,"y":60,"width":8,"height":8}'` | Map tiles (max 32x32) |
-| `node cli.js guests` / `staff` | People, 100 at a time (`offset`, `limit`). Filter guests by `ride`, `state`, `thought`, `item`; staff by `staffType` |
+| `node cli.js guests` / `staff` | People, 100 at a time (`offset`, `limit`). Filter guests by `ride`, `state`, `thought`, `item`; staff by `staffType`. Each guest has `inParkSince`: the game date the bridge first saw them in the park |
 | `node cli.js thoughts` | What guests are thinking, counted (the guest list's summary) |
 | `node cli.js finances` | Money in and out by month and type (the finances window) |
 | `node cli.js research` | What's being invented and when (the research window) |

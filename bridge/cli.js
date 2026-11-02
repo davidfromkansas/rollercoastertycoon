@@ -181,7 +181,6 @@ async function main(argv) {
         if (!request.session) throw new Error('Run "node cli.js arm" first');
         // Record the intent on disk BEFORE sending. If this id was used before, this fails and nothing is sent.
         writeOnce(path.join(LOGS, `${request.id}.request.json`), request);
-        console.error(`Request id: ${request.id} (check it later with: node cli.js receipt ${request.id})`);
     }
 
     const reply = await send(config, request);

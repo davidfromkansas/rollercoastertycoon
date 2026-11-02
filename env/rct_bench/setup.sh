@@ -15,6 +15,13 @@ mkdir -p /home/agent && chown agent:agent /home/agent && chmod 750 /home/agent
 
 pkill -9 -x openrct2 2>/dev/null || true
 sleep 1
+
+# Newer bridge files than the image has (sent by the benchmark as /tmp/rct-bridge-update.tgz): unpack, rebuild the plugin, install it.
+if [ -f /tmp/rct-bridge-update.tgz ]; then
+    chmod 644 /tmp/rct-bridge-update.tgz
+    (cd $B && as_player tar -xzf /tmp/rct-bridge-update.tgz && as_player node scripts/build.js >/dev/null \
+        && as_player cp dist/agent-bridge.js user-data/plugin/agent-bridge.js) || { echo "bridge update failed"; exit 1; }
+fi
 cp "$PARK" /home/player/park.sc6 && chown player:player /home/player/park.sc6
 as_player bash /home/player/start-game.sh /home/player/park.sc6 >/dev/null
 
@@ -48,9 +55,35 @@ chmod o+rx $B/user-data/screenshot $B/user-data/save
 
 # Video of the whole run: record the game's screen until finalize stops it.
 # Kept in a folder only root can read, so the AI never sees it.
+# Layout: the game (1280x720) on the left, with its bottom-left (money, guests, rating) and bottom-right (date, weather)
+# panels shown at double size; the AI's live log on a 640-pixel panel to the right (panel.js keeps it up to date).
 mkdir -p /root/rec && chmod 700 /root/rec
+SCENARIO_NAME="$(basename "$PARK" | sed 's/\.[^.]*$//')"
+printf 'The AI playing %s\n' "$SCENARIO_NAME" > /root/rec/header.txt
+printf ' \n' > /root/rec/header-goal.txt
+printf 'Waiting for the AI to start...\n' > /root/rec/panel.txt
+# Header details (scenario and goal), sent by the benchmark.
+[ -f /tmp/rct-panel-info.json ] && mv /tmp/rct-panel-info.json /root/rec/info.json
+if [ -f /tmp/rct-panel.js ]; then
+    mv /tmp/rct-panel.js /root/rec/panel.js && chmod 700 /root/rec/panel.js
+    setsid nohup node /root/rec/panel.js "$A" /root/rec/panel.txt /root/rec/header.txt /root/rec/info.json \
+        >/root/rec/panel.log 2>&1 < /dev/null &
+    echo $! > /root/rec/panel.pid
+fi
+MONO=/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf
+SANS=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
+LAYOUT="[0:v]split=3[game][l][r];\
+[l]crop=142:32:0:688,scale=284:64:flags=neighbor[left];\
+[r]crop=142:32:1138:688,scale=284:64:flags=neighbor[right];\
+[game][left]overlay=0:656[g1];[g1][right]overlay=996:656[g2];\
+[g2]pad=1920:720:0:0:color=0x15181d,\
+drawbox=x=1280:y=0:w=640:h=86:color=0x24313f:t=fill,\
+drawtext=fontfile=$SANS:textfile=/root/rec/header.txt:reload=1:expansion=none:fontcolor=white:fontsize=19:x=1296:y=12,\
+drawtext=fontfile=$SANS:textfile=/root/rec/header-goal.txt:reload=1:expansion=none:fontcolor=0xc9d6e3:fontsize=13:line_spacing=4:x=1296:y=42,\
+drawtext=fontfile=$MONO:textfile=/root/rec/panel.txt:reload=1:expansion=none:fontcolor=0xe8e8e8:fontsize=14:line_spacing=4:x=1296:y=98[out]"
 setsid nohup ffmpeg -nostdin -loglevel error -f x11grab -framerate 10 -video_size 1280x720 -i :99 \
-    -c:v libx264 -preset ultrafast -crf 28 -pix_fmt yuv420p /root/rec/run.mkv >/root/rec/ffmpeg.log 2>&1 < /dev/null &
+    -filter_complex "$LAYOUT" -map '[out]' \
+    -c:v libx264 -preset ultrafast -crf 28 -pix_fmt yuv420p -y /root/rec/run.mkv >/root/rec/ffmpeg.log 2>&1 < /dev/null &
 echo $! > /root/rec/pid
 sleep 2
 kill -0 "$(cat /root/rec/pid)" 2>/dev/null || { echo "screen recorder did not start:"; cat /root/rec/ffmpeg.log; }

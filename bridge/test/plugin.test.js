@@ -86,7 +86,7 @@ test('a batch stops at the budget and reports partial', async () => {
     const hire = { action: 'staffhire', args: { autoPosition: true, staffType: 0, costumeIndex: 0, staffOrders: 7 } };
     const reply = await g.request({ op: 'batch.execute', session, args: { actions: [hire, hire, hire], maxCost: 12000 } });
     assert.strictEqual(reply.result.state, 'partial');
-    assert.strictEqual(reply.result.detail.phase, 'budget');
+    assert.strictEqual(reply.result.failure.phase, 'budget');
     assert.strictEqual(g.executed.length, 2);
     assert.strictEqual(reply.result.spent, 10000);
 });
@@ -97,7 +97,7 @@ test('a failed check stops the batch without running the action', async () => {
     const hire = { action: 'staffhire', args: { autoPosition: true, staffType: 0, costumeIndex: 0, staffOrders: 7 } };
     const reply = await g.request({ op: 'batch.execute', session, args: { actions: [hire], maxCost: 0 } });
     assert.strictEqual(reply.result.state, 'partial');
-    assert.strictEqual(reply.result.detail.phase, 'check');
+    assert.strictEqual(reply.result.failure.phase, 'check');
     assert.strictEqual(g.executed.length, 0);
 });
 
@@ -133,7 +133,7 @@ test('coaster.build creates a ride and places every planned piece on it', async 
         create: { rideType: 52, rideObject: 1, entranceObject: 0, colour1: 0, colour2: 0, inspectionInterval: 0 },
         test: true,
     } });
-    assert.strictEqual(build.result.state, 'completed', JSON.stringify(build.result.detail));
+    assert.strictEqual(build.result.state, 'completed', JSON.stringify(build.result.failure));
     assert.strictEqual(build.result.ride, 7);
     const names = g.executed.map(e => e.name);
     assert.deepStrictEqual(names.slice(0, 2), ['ridecreate', 'ridesetname']);

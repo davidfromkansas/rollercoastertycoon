@@ -5,8 +5,10 @@ The AI (user `agent`) plays from a clean folder with only the bridge helper and 
 Pass = the game itself says the scenario is completed.
 """
 
+import io
 import json
 import os
+import tarfile
 import time
 from importlib.resources import files
 from pathlib import Path
@@ -17,6 +19,22 @@ IMAGE = "prime/cmvypuqxg0013vqovd7u20x6e/rct-bench:v2"
 DATA = files("rct_bench") / "data"
 BRIDGE = "/home/player/bridge"
 PLAY = "/home/agent/play"
+
+# Bridge files sent into each game before it starts, so bridge fixes work without rebuilding the image.
+BRIDGE_UPDATE = ["cli.js", "AGENTS.md", "src", "scripts/build.js", "park/wait.js"]
+
+
+def bridge_update() -> bytes | None:
+    """The repo's bridge folder (or RCT_BRIDGE_DIR) packed as a .tgz, or None if it isn't there."""
+    folder = Path(os.environ.get("RCT_BRIDGE_DIR") or Path(str(files("rct_bench"))).parents[1] / "bridge")
+    if not (folder / "src" / "plugin.js").is_file():
+        return None
+    buf = io.BytesIO()
+    with tarfile.open(fileobj=buf, mode="w:gz") as tar:
+        for name in BRIDGE_UPDATE:
+            tar.add(folder / name, arcname=name)
+    return buf.getvalue()
+
 
 # Each running game's sandbox, by trace id, so the stop check below can read the game.
 RUNTIMES: dict[str, object] = {}
@@ -49,6 +67,13 @@ class RctTask(vf.Task[RctData]):
         RUNTIMES[trace.id] = runtime
         script = (files("rct_bench") / "setup.sh").read_bytes()
         await runtime.write("/tmp/rct-setup.sh", script)
+        # Live AI log for the video's side panel (started by setup.sh, root only; the AI can't see it).
+        await runtime.write("/tmp/rct-panel.js", (files("rct_bench") / "panel.js").read_bytes())
+        info = {"scenario": self.data.scenario, "goal": self.data.goal}
+        await runtime.write("/tmp/rct-panel-info.json", json.dumps(info).encode())
+        update = bridge_update()
+        if update:
+            await runtime.write("/tmp/rct-bridge-update.tgz", update)
         result = await runtime.run(["bash", "/tmp/rct-setup.sh", self.data.park_file], {})
         if result.exit_code != 0 or "ready" not in result.stdout:
             raise RuntimeError(
@@ -86,6 +111,7 @@ class RctTask(vf.Task[RctData]):
         RUNTIMES.pop(trace.id, None)
         LAST_CHECK.pop(trace.id, None)
         await runtime.run(["bash", "-c", "kill $(cat /root/rec/camera.pid 2>/dev/null) 2>/dev/null; true"], {})
+        # The side panel stops at the end of the video (it keeps the last lines on screen until the recorder stops).
         # Pause the game so the score is read from the moment the AI stopped.
         await runtime.run(
             [
@@ -130,6 +156,7 @@ class RctTask(vf.Task[RctData]):
         video = (
             "p=$(cat /root/rec/pid 2>/dev/null) && kill -INT $p 2>/dev/null; "
             "for i in $(seq 1 30); do kill -0 $p 2>/dev/null || break; sleep 1; done; "
+            "kill $(cat /root/rec/panel.pid 2>/dev/null) 2>/dev/null; "
             "cd /root/rec && ffmpeg -nostdin -loglevel error -y -i run.mkv -c copy -movflags +faststart run.mp4 && "
             "ffmpeg -nostdin -loglevel error -y -i run.mkv -vf 'setpts=PTS/16' -r 30 -an "
             "-c:v libx264 -preset veryfast -crf 26 -pix_fmt yuv420p -movflags +faststart run-16x.mp4"

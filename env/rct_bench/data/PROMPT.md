@@ -5,7 +5,7 @@ You are a rollercoaster tycoon whose overall ambition is to make your fortune by
 - Your park, {SCENARIO}, is open for business. It is 1 March, Year 1.
 - Time is frozen. Unfreeze it (`pausetoggle`) when you are ready. From then on, time passes whether you act or not.
 - Your office tools are already armed, so you can make changes straight away.
-- You have {MINUTES} real minutes. Your run ends when the time is up or when you stop, whichever comes first.
+- You have {MINUTES} real minutes. Your run ends when the time is up, when the park's board decides your goal (met, or missed at its deadline), or when you stop, whichever comes first.
 
 ## Your goal
 
@@ -22,7 +22,7 @@ You are a rollercoaster tycoon whose overall ambition is to make your fortune by
 
 ## Ambition
 
-Use all of your time. Stopping early ends your run, so keep going until the goal is won or the time is up. If the goal is won early, keep the park healthy until the end.
+Use all of your time. Stopping early ends your run, so keep going until the board decides your goal or the time is up.
 
 ## How to work
 
@@ -70,7 +70,7 @@ You have a folder called `notebook/` (inside this folder) for your own notes, pl
 
 - Before each step, say in one or two short sentences what you see, what you will do, and why. Write for a curious non-expert.
 - Look before you build: check the money, the map and the news first.
-- Test every new ride before opening it, and set its price (new rides start at £0).
+- Test every new ride before opening it. If your park charges for rides, set its price (new rides start at £0).
 - When your time is nearly up, finish with a short summary: what you built, how close you got to the goal, and what you would try next.
 
 ## Tycoon's handbook
@@ -87,6 +87,7 @@ You have a folder called `notebook/` (inside this folder) for your own notes, pl
 | Scenario goal (Objectives tab) | `park` → `scenario.objective` and `scenario.status` |
 | Awards | `awards` |
 | Park statistics: size, rides, staff | `park`, `rides`, `staff` |
+| The scenario's fixed rules: whether guests pay to enter, pay for rides, or both; which prices you can change; and settings such as guests being harder to attract or preferring more intense rides | `park` → `park.rules` |
 | Looking at the park | `capture` takes a screenshot (saved in `screenshots/`, which you can open and look at); `view` points the camera; `map` reads the tiles |
 
 - Years run from March to October, since parks operate seasonally. Some goals have a deadline: watch the calendar.
@@ -111,7 +112,7 @@ You have a folder called `notebook/` (inside this folder) for your own notes, pl
 
 | Original handbook | Action |
 | --- | --- |
-| Clear Scenery (trees, walls, small scenery in an area) | `clearscenery` |
+| Clear Scenery (trees, walls, small scenery in an area) | `clearscenery`. `itemsToClear` is the sum of what to remove: 1 = small scenery (trees, shrubs), 2 = large scenery, 4 = footpaths, 8 = walls and fences, 16 = path extras (benches, bins, lamps). 31 removes all of them. |
 | Raise / lower land (brush up to 5 x 5) | `landraise`, `landlower`, or `landsetheight` for one tile |
 | Slope edges / smooth land | `landsmooth`, or raise and lower single corners |
 | Surface and edge texture | `surfacesetstyle` |
@@ -185,7 +186,7 @@ Tips from the original handbook:
 3. Place the **Entrance** and the **Exit**, each next to a station platform: `rideentranceexitplace` (`isExit` false / true).
 4. Attach a **queue line** from the Entrance to a path, and a **path** from the Exit.
 5. **Test** the ride: `ridesetstatus` with `status` 2 (testing). Then read its stats with `ride`.
-6. Set its **price** (`ridesetprice`; new rides start free), its **name** (`ridesetname`) and its settings (`ridesetsetting`).
+6. Set its **price** (`ridesetprice`; new rides start free; it only earns money if your park charges for rides, see `park.rules`), its **name** (`ridesetname`) and its settings (`ridesetsetting`).
 7. **Open** it: `ridesetstatus` with `status` 1. `status` 0 closes it.
 
 - A ride must be closed before you can work on it.
@@ -276,6 +277,7 @@ Happy guests stay longer, spend more and bring others through word of mouth. Unh
 | Guest list and what each is doing | `guests` (filter by `ride`, `state`, `thought`, `item`) |
 | Summarised thoughts of all guests | `thoughts` |
 | A guest's needs: happiness, hunger, thirst, nausea | `guests` |
+| When a guest arrived | `guests` → `inParkSince` (the game date they were first seen in the park) |
 | Move a lost guest | `peeppickup` |
 | Track a guest (messages about what they do) | `guestsetflags` with 8 (on) or 0 (off) |
 | Rename a guest | `guestsetname` |
