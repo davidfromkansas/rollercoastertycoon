@@ -1,0 +1,639 @@
+{
+  "0": {
+    "name": "flat",
+    "type": 0,
+    "beginDirection": 0,
+    "endDirection": 0,
+    "beginZ": 0,
+    "endZ": 0,
+    "endX": 0,
+    "endY": 0,
+    "beginSlope": 0,
+    "endSlope": 0,
+    "beginBank": 0,
+    "endBank": 0,
+    "elements": [
+      {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    ],
+    "allowsChainLift": true
+  },
+  "1": {
+    "name": "endStation",
+    "type": 1,
+    "beginDirection": 0,
+    "endDirection": 0,
+    "beginZ": 0,
+    "endZ": 0,
+    "endX": 0,
+    "endY": 0,
+    "beginSlope": 0,
+    "endSlope": 0,
+    "beginBank": 0,
+    "endBank": 0,
+    "elements": [
+      {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    ],
+    "allowsChainLift": false
+  },
+  "2": {
+    "name": "beginStation",
+    "type": 2,
+    "beginDirection": 0,
+    "endDirection": 0,
+    "beginZ": 0,
+    "endZ": 0,
+    "endX": 0,
+    "endY": 0,
+    "beginSlope": 0,
+    "endSlope": 0,
+    "beginBank": 0,
+    "endBank": 0,
+    "elements": [
+      {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    ],
+    "allowsChainLift": false
+  },
+  "3": {
+    "name": "middleStation",
+    "type": 3,
+    "beginDirection": 0,
+    "endDirection": 0,
+    "beginZ": 0,
+    "endZ": 0,
+    "endX": 0,
+    "endY": 0,
+    "beginSlope": 0,
+    "endSlope": 0,
+    "beginBank": 0,
+    "endBank": 0,
+    "elements": [
+      {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    ],
+    "allowsChainLift": false
+  },
+  "4": {
+    "name": "up25",
+    "type": 4,
+    "beginDirection": 0,
+    "endDirection": 0,
+    "beginZ": 0,
+    "endZ": 16,
+    "endX": 0,
+    "endY": 0,
+    "beginSlope": 2,
+    "endSlope": 2,
+    "beginBank": 0,
+    "endBank": 0,
+    "elements": [
+      {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    ],
+    "allowsChainLift": true
+  },
+  "6": {
+    "name": "flatToUp25",
+    "type": 6,
+    "beginDirection": 0,
+    "endDirection": 0,
+    "beginZ": 0,
+    "endZ": 8,
+    "endX": 0,
+    "endY": 0,
+    "beginSlope": 0,
+    "endSlope": 2,
+    "beginBank": 0,
+    "endBank": 0,
+    "elements": [
+      {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    ],
+    "allowsChainLift": true
+  },
+  "9": {
+    "name": "up25ToFlat",
+    "type": 9,
+    "beginDirection": 0,
+    "endDirection": 0,
+    "beginZ": 0,
+    "endZ": 8,
+    "endX": 0,
+    "endY": 0,
+    "beginSlope": 2,
+    "endSlope": 0,
+    "beginBank": 0,
+    "endBank": 0,
+    "elements": [
+      {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    ],
+    "allowsChainLift": true
+  },
+  "10": {
+    "name": "down25",
+    "type": 10,
+    "beginDirection": 0,
+    "endDirection": 0,
+    "beginZ": 16,
+    "endZ": 0,
+    "endX": 0,
+    "endY": 0,
+    "beginSlope": 6,
+    "endSlope": 6,
+    "beginBank": 0,
+    "endBank": 0,
+    "elements": [
+      {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    ],
+    "allowsChainLift": true
+  },
+  "12": {
+    "name": "flatToDown25",
+    "type": 12,
+    "beginDirection": 0,
+    "endDirection": 0,
+    "beginZ": 8,
+    "endZ": 0,
+    "endX": 0,
+    "endY": 0,
+    "beginSlope": 0,
+    "endSlope": 6,
+    "beginBank": 0,
+    "endBank": 0,
+    "elements": [
+      {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    ],
+    "allowsChainLift": true
+  },
+  "15": {
+    "name": "down25ToFlat",
+    "type": 15,
+    "beginDirection": 0,
+    "endDirection": 0,
+    "beginZ": 8,
+    "endZ": 0,
+    "endX": 0,
+    "endY": 0,
+    "beginSlope": 6,
+    "endSlope": 0,
+    "beginBank": 0,
+    "endBank": 0,
+    "elements": [
+      {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    ],
+    "allowsChainLift": true
+  },
+  "16": {
+    "name": "leftQuarterTurn5Tiles",
+    "type": 16,
+    "beginDirection": 0,
+    "endDirection": 3,
+    "beginZ": 0,
+    "endZ": 0,
+    "endX": -64,
+    "endY": -64,
+    "beginSlope": 0,
+    "endSlope": 0,
+    "beginBank": 0,
+    "endBank": 0,
+    "elements": [
+      {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      {
+        "x": 0,
+        "y": -32,
+        "z": 0
+      },
+      {
+        "x": -32,
+        "y": 0,
+        "z": 0
+      },
+      {
+        "x": -32,
+        "y": -32,
+        "z": 0
+      },
+      {
+        "x": -32,
+        "y": -64,
+        "z": 0
+      },
+      {
+        "x": -64,
+        "y": -32,
+        "z": 0
+      },
+      {
+        "x": -64,
+        "y": -64,
+        "z": 0
+      }
+    ],
+    "allowsChainLift": false
+  },
+  "17": {
+    "name": "rightQuarterTurn5Tiles",
+    "type": 17,
+    "beginDirection": 0,
+    "endDirection": 1,
+    "beginZ": 0,
+    "endZ": 0,
+    "endX": -64,
+    "endY": 64,
+    "beginSlope": 0,
+    "endSlope": 0,
+    "beginBank": 0,
+    "endBank": 0,
+    "elements": [
+      {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      {
+        "x": 0,
+        "y": 32,
+        "z": 0
+      },
+      {
+        "x": -32,
+        "y": 0,
+        "z": 0
+      },
+      {
+        "x": -32,
+        "y": 32,
+        "z": 0
+      },
+      {
+        "x": -32,
+        "y": 64,
+        "z": 0
+      },
+      {
+        "x": -64,
+        "y": 32,
+        "z": 0
+      },
+      {
+        "x": -64,
+        "y": 64,
+        "z": 0
+      }
+    ],
+    "allowsChainLift": false
+  },
+  "19": {
+    "name": "flatToRightBank",
+    "type": 19,
+    "beginDirection": 0,
+    "endDirection": 0,
+    "beginZ": 0,
+    "endZ": 0,
+    "endX": 0,
+    "endY": 0,
+    "beginSlope": 0,
+    "endSlope": 0,
+    "beginBank": 0,
+    "endBank": 4,
+    "elements": [
+      {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    ],
+    "allowsChainLift": false
+  },
+  "21": {
+    "name": "rightBankToFlat",
+    "type": 21,
+    "beginDirection": 0,
+    "endDirection": 0,
+    "beginZ": 0,
+    "endZ": 0,
+    "endX": 0,
+    "endY": 0,
+    "beginSlope": 0,
+    "endSlope": 0,
+    "beginBank": 4,
+    "endBank": 0,
+    "elements": [
+      {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    ],
+    "allowsChainLift": false
+  },
+  "23": {
+    "name": "bankedRightQuarterTurn5Tiles",
+    "type": 23,
+    "beginDirection": 0,
+    "endDirection": 1,
+    "beginZ": 0,
+    "endZ": 0,
+    "endX": -64,
+    "endY": 64,
+    "beginSlope": 0,
+    "endSlope": 0,
+    "beginBank": 4,
+    "endBank": 4,
+    "elements": [
+      {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      {
+        "x": 0,
+        "y": 32,
+        "z": 0
+      },
+      {
+        "x": -32,
+        "y": 0,
+        "z": 0
+      },
+      {
+        "x": -32,
+        "y": 32,
+        "z": 0
+      },
+      {
+        "x": -32,
+        "y": 64,
+        "z": 0
+      },
+      {
+        "x": -64,
+        "y": 32,
+        "z": 0
+      },
+      {
+        "x": -64,
+        "y": 64,
+        "z": 0
+      }
+    ],
+    "allowsChainLift": false
+  },
+  "42": {
+    "name": "leftQuarterTurn3Tiles",
+    "type": 42,
+    "beginDirection": 0,
+    "endDirection": 3,
+    "beginZ": 0,
+    "endZ": 0,
+    "endX": -32,
+    "endY": -32,
+    "beginSlope": 0,
+    "endSlope": 0,
+    "beginBank": 0,
+    "endBank": 0,
+    "elements": [
+      {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      {
+        "x": 0,
+        "y": -32,
+        "z": 0
+      },
+      {
+        "x": -32,
+        "y": 0,
+        "z": 0
+      },
+      {
+        "x": -32,
+        "y": -32,
+        "z": 0
+      }
+    ],
+    "allowsChainLift": false
+  },
+  "43": {
+    "name": "rightQuarterTurn3Tiles",
+    "type": 43,
+    "beginDirection": 0,
+    "endDirection": 1,
+    "beginZ": 0,
+    "endZ": 0,
+    "endX": -32,
+    "endY": 32,
+    "beginSlope": 0,
+    "endSlope": 0,
+    "beginBank": 0,
+    "endBank": 0,
+    "elements": [
+      {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      {
+        "x": 0,
+        "y": 32,
+        "z": 0
+      },
+      {
+        "x": -32,
+        "y": 0,
+        "z": 0
+      },
+      {
+        "x": -32,
+        "y": 32,
+        "z": 0
+      }
+    ],
+    "allowsChainLift": false
+  },
+  "99": {
+    "name": "brakes",
+    "type": 99,
+    "beginDirection": 0,
+    "endDirection": 0,
+    "beginZ": 0,
+    "endZ": 0,
+    "endX": 0,
+    "endY": 0,
+    "beginSlope": 0,
+    "endSlope": 0,
+    "beginBank": 0,
+    "endBank": 0,
+    "elements": [
+      {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    ],
+    "allowsChainLift": false
+  },
+  "133": {
+    "name": "leftEighthToDiag",
+    "type": 133,
+    "beginDirection": 0,
+    "endDirection": 7,
+    "beginZ": 0,
+    "endZ": 0,
+    "endX": -64,
+    "endY": -32,
+    "beginSlope": 0,
+    "endSlope": 0,
+    "beginBank": 0,
+    "endBank": 0,
+    "elements": [
+      {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      {
+        "x": -32,
+        "y": 0,
+        "z": 0
+      },
+      {
+        "x": -32,
+        "y": -32,
+        "z": 0
+      },
+      {
+        "x": -64,
+        "y": 0,
+        "z": 0
+      },
+      {
+        "x": -64,
+        "y": -32,
+        "z": 0
+      }
+    ],
+    "allowsChainLift": false
+  },
+  "136": {
+    "name": "rightEighthToOrthogonal",
+    "type": 136,
+    "beginDirection": 4,
+    "endDirection": 1,
+    "beginZ": 0,
+    "endZ": 0,
+    "endX": -32,
+    "endY": 64,
+    "beginSlope": 0,
+    "endSlope": 0,
+    "beginBank": 0,
+    "endBank": 0,
+    "elements": [
+      {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      {
+        "x": 0,
+        "y": 32,
+        "z": 0
+      },
+      {
+        "x": -32,
+        "y": 0,
+        "z": 0
+      },
+      {
+        "x": -32,
+        "y": 32,
+        "z": 0
+      },
+      {
+        "x": -32,
+        "y": 64,
+        "z": 0
+      }
+    ],
+    "allowsChainLift": false
+  },
+  "141": {
+    "name": "diagFlat",
+    "type": 141,
+    "beginDirection": 4,
+    "endDirection": 4,
+    "beginZ": 0,
+    "endZ": 0,
+    "endX": -32,
+    "endY": 32,
+    "beginSlope": 0,
+    "endSlope": 0,
+    "beginBank": 0,
+    "endBank": 0,
+    "elements": [
+      {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      {
+        "x": 0,
+        "y": 32,
+        "z": 0
+      },
+      {
+        "x": -32,
+        "y": 0,
+        "z": 0
+      },
+      {
+        "x": -32,
+        "y": 32,
+        "z": 0
+      }
+    ],
+    "allowsChainLift": true
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "op": "track.plan",
+  "args": {
+    "start": { "x": 2048, "y": 2048, "z": 112, "direction": 0 },
+    "requireClosed": true,
+    "pieces": [
+      { "type": "endStation", "repeat": 4 },
+      { "type": "flat", "repeat": 4 },
+      { "type": "rightQuarterTurn3Tiles", "repeat": 2 },
+      { "type": "flatToUp25", "chain": true },
+      { "type": "up25", "chain": true, "repeat": 2 },
+      { "type": "up25ToFlat", "chain": true },
+      "flatToDown25",
+      { "type": "down25", "repeat": 2 },
+      "down25ToFlat",
+      { "type": "rightQuarterTurn3Tiles", "repeat": 2 }
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "op": "batch.execute",
+  "args": {
+    "maxCost": 20000,
+    "actions": [
+      { "action": "staffhire", "args": { "autoPosition": true, "staffType": 0, "costumeIndex": 0, "staffOrders": 7 } },
+      { "action": "staffhire", "args": { "autoPosition": true, "staffType": 1, "costumeIndex": 0, "staffOrders": 3 } }
+    ]
+  }
+}

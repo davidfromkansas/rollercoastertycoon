@@ -1,0 +1,13 @@
+# Private or machine-specific: never share or commit these
+bridge.config.json
+dist/
+runtime/
+vendor/
+user-data/
+logs/
+*.park
+*.sv6
+*.png
+node_modules/
+.DS_Store
+/parks/

@@ -1,0 +1,421 @@
+{
+  "ridecreate": {
+    "rideType": "number",
+    "rideObject": "number",
+    "entranceObject": "number",
+    "colour1": "number",
+    "colour2": "number",
+    "inspectionInterval": "number"
+  },
+  "ridedemolish": {
+    "ride": "number",
+    "modifyType": "number"
+  },
+  "ridesetname": {
+    "ride": "number",
+    "name": "string"
+  },
+  "ridesetprice": {
+    "ride": "number",
+    "price": "number",
+    "isPrimaryPrice": "boolean"
+  },
+  "ridesetsetting": {
+    "ride": "number",
+    "setting": "number",
+    "value": "number"
+  },
+  "ridesetstatus": {
+    "ride": "number",
+    "status": "number"
+  },
+  "ridesetvehicle": {
+    "ride": "number",
+    "type": "number",
+    "value": "number",
+    "colour": "number"
+  },
+  "ridesetappearance": {
+    "ride": "number",
+    "type": "number",
+    "value": "number",
+    "index": "number"
+  },
+  "rideentranceexitplace": {
+    "x": "number",
+    "y": "number",
+    "direction": "number",
+    "ride": "number",
+    "station": "number",
+    "isExit": "boolean"
+  },
+  "rideentranceexitremove": {
+    "x": "number",
+    "y": "number",
+    "ride": "number",
+    "station": "number",
+    "isExit": "boolean"
+  },
+  "trackplace": {
+    "x": "number",
+    "y": "number",
+    "z": "number",
+    "direction": "number",
+    "ride": "number",
+    "trackType": "number",
+    "rideType": "number",
+    "brakeSpeed": "number",
+    "colour": "number",
+    "seatRotation": "number",
+    "trackPlaceFlags": "number",
+    "isFromTrackDesign": "boolean"
+  },
+  "trackremove": {
+    "x": "number",
+    "y": "number",
+    "z": "number",
+    "direction": "number",
+    "trackType": "number",
+    "sequence": "number"
+  },
+  "tracksetbrakespeed": {
+    "x": "number",
+    "y": "number",
+    "z": "number",
+    "trackType": "number",
+    "brakeSpeed": "number"
+  },
+  "footpathplace": {
+    "x": "number",
+    "y": "number",
+    "z": "number",
+    "direction": "number",
+    "object": "number",
+    "railingsObject": "number",
+    "slopeType": "number",
+    "slopeDirection": "Direction",
+    "constructFlags": "number"
+  },
+  "footpathremove": {
+    "x": "number",
+    "y": "number",
+    "z": "number"
+  },
+  "footpathadditionplace": {
+    "x": "number",
+    "y": "number",
+    "z": "number",
+    "object": "number"
+  },
+  "footpathadditionremove": {
+    "x": "number",
+    "y": "number",
+    "z": "number"
+  },
+  "staffhire": {
+    "autoPosition": "boolean",
+    "staffType": "number",
+    "costumeIndex": "number",
+    "staffOrders": "number"
+  },
+  "stafffire": {
+    "id": "number"
+  },
+  "staffsetorders": {
+    "id": "number",
+    "staffOrders": "number"
+  },
+  "staffsetname": {
+    "id": "number",
+    "name": "string"
+  },
+  "staffsetpatrolarea": {
+    "id": "number",
+    "x1": "number",
+    "y1": "number",
+    "x2": "number",
+    "y2": "number",
+    "mode": "number"
+  },
+  "staffsetcolour": {
+    "staffType": "number",
+    "colour": "number"
+  },
+  "parksetname": {
+    "name": "string"
+  },
+  "parksetentrancefee": {
+    "value": "number"
+  },
+  "parksetloan": {
+    "value": "number"
+  },
+  "parksetparameter": {
+    "parameter": "number",
+    "value": "number"
+  },
+  "parksetresearchfunding": {
+    "priorities": "number",
+    "fundingAmount": "number"
+  },
+  "parkmarketing": {
+    "type": "number",
+    "item": "number",
+    "duration": "number"
+  },
+  "landsetheight": {
+    "x": "number",
+    "y": "number",
+    "height": "number",
+    "style": "number"
+  },
+  "landbuyrights": {
+    "x1": "number",
+    "y1": "number",
+    "x2": "number",
+    "y2": "number",
+    "setting": "number"
+  },
+  "surfacesetstyle": {
+    "x1": "number",
+    "y1": "number",
+    "x2": "number",
+    "y2": "number",
+    "surfaceStyle": "number",
+    "edgeStyle": "number"
+  },
+  "watersetheight": {
+    "x": "number",
+    "y": "number",
+    "height": "number"
+  },
+  "smallsceneryplace": {
+    "x": "number",
+    "y": "number",
+    "z": "number",
+    "direction": "number",
+    "object": "number",
+    "quadrant": "number",
+    "primaryColour": "number",
+    "secondaryColour": "number",
+    "tertiaryColour": "number"
+  },
+  "smallsceneryremove": {
+    "x": "number",
+    "y": "number",
+    "z": "number",
+    "object": "number",
+    "quadrant": "number"
+  },
+  "wallplace": {
+    "x": "number",
+    "y": "number",
+    "z": "number",
+    "object": "number",
+    "edge": "number",
+    "primaryColour": "number",
+    "secondaryColour": "number",
+    "tertiaryColour": "number"
+  },
+  "wallremove": {
+    "x": "number",
+    "y": "number",
+    "z": "number",
+    "direction": "number"
+  },
+  "gamesetspeed": {
+    "speed": "number"
+  },
+  "pausetoggle": {},
+  "ridesetcolourscheme": {
+    "x": "number",
+    "y": "number",
+    "z": "number",
+    "direction": "number",
+    "trackType": "number",
+    "colourScheme": "number"
+  },
+  "mazeplacetrack": {
+    "x": "number",
+    "y": "number",
+    "z": "number",
+    "ride": "number",
+    "mazeEntry": "number"
+  },
+  "mazesettrack": {
+    "x": "number",
+    "y": "number",
+    "z": "number",
+    "direction": "number",
+    "ride": "number",
+    "mode": "number",
+    "isInitialPlacement": "boolean"
+  },
+  "footpathlayoutplace": {
+    "x": "number",
+    "y": "number",
+    "z": "number",
+    "edges": "number",
+    "object": "number",
+    "railingsObject": "number",
+    "constructFlags": "number",
+    "slopeType": "number",
+    "slopeDirection": "number"
+  },
+  "staffsetcostume": {
+    "id": "number",
+    "costume": "number"
+  },
+  "peeppickup": {
+    "type": "number",
+    "id": "number",
+    "x": "number",
+    "y": "number",
+    "z": "number",
+    "playerId": "number"
+  },
+  "guestsetflags": {
+    "peep": "number",
+    "guestFlags": "number"
+  },
+  "guestsetname": {
+    "peep": "number",
+    "name": "string"
+  },
+  "balloonpress": {
+    "id": "number"
+  },
+  "landraise": {
+    "x": "number",
+    "y": "number",
+    "x1": "number",
+    "y1": "number",
+    "x2": "number",
+    "y2": "number",
+    "selectionType": "number"
+  },
+  "landlower": {
+    "x": "number",
+    "y": "number",
+    "x1": "number",
+    "y1": "number",
+    "x2": "number",
+    "y2": "number",
+    "selectionType": "number"
+  },
+  "landsmooth": {
+    "x": "number",
+    "y": "number",
+    "x1": "number",
+    "y1": "number",
+    "x2": "number",
+    "y2": "number",
+    "selectionType": "number",
+    "isLowering": "boolean"
+  },
+  "waterraise": {
+    "x1": "number",
+    "y1": "number",
+    "x2": "number",
+    "y2": "number"
+  },
+  "waterlower": {
+    "x1": "number",
+    "y1": "number",
+    "x2": "number",
+    "y2": "number"
+  },
+  "clearscenery": {
+    "itemsToClear": "number",
+    "x1": "number",
+    "y1": "number",
+    "x2": "number",
+    "y2": "number"
+  },
+  "smallscenerysetcolour": {
+    "x": "number",
+    "y": "number",
+    "z": "number",
+    "quadrant": "number",
+    "sceneryType": "number",
+    "primaryColour": "number",
+    "secondaryColour": "number",
+    "tertiaryColour": "number"
+  },
+  "largesceneryplace": {
+    "x": "number",
+    "y": "number",
+    "z": "number",
+    "direction": "number",
+    "object": "number",
+    "primaryColour": "number",
+    "secondaryColour": "number",
+    "tertiaryColour": "number"
+  },
+  "largesceneryremove": {
+    "x": "number",
+    "y": "number",
+    "z": "number",
+    "direction": "number",
+    "tileIndex": "number"
+  },
+  "largescenerysetcolour": {
+    "x": "number",
+    "y": "number",
+    "z": "number",
+    "direction": "number",
+    "tileIndex": "number",
+    "primaryColour": "number",
+    "secondaryColour": "number",
+    "tertiaryColour": "number"
+  },
+  "wallsetcolour": {
+    "x": "number",
+    "y": "number",
+    "z": "number",
+    "direction": "number",
+    "primaryColour": "number",
+    "secondaryColour": "number",
+    "tertiaryColour": "number"
+  },
+  "bannerplace": {
+    "x": "number",
+    "y": "number",
+    "z": "number",
+    "direction": "number",
+    "object": "number",
+    "primaryColour": "number"
+  },
+  "bannerremove": {
+    "x": "number",
+    "y": "number",
+    "z": "number",
+    "direction": "number"
+  },
+  "bannersetcolour": {
+    "x": "number",
+    "y": "number",
+    "z": "number",
+    "direction": "number",
+    "primaryColour": "number"
+  },
+  "bannersetname": {
+    "id": "number",
+    "name": "string"
+  },
+  "bannersetstyle": {
+    "id": "number",
+    "type": "number",
+    "parameter": "number"
+  },
+  "signsetname": {
+    "id": "number",
+    "name": "string"
+  },
+  "signsetstyle": {
+    "id": "number",
+    "mainColour": "number",
+    "textColour": "number",
+    "isLarge": "boolean"
+  }
+}

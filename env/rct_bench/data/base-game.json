@@ -1,0 +1,156 @@
+{
+  "version": 1,
+  "prompt_template": "PROMPT.md",
+  "tasks": [
+    {
+      "id": "electric-fields",
+      "scenario": "Electric Fields",
+      "park_file": "/opt/rct2/Scenarios/Electric Fields.SC6",
+      "set": "base",
+      "difficulty": "beginner",
+      "goal": "Have **at least 700 guests in the park at the end of October, Year 2**. The park rating must also be at least 600 on that date.",
+      "minutes": 60,
+      "pass_check": "game reports scenario.status == 'completed'"
+    },
+    {
+      "id": "factory-capers",
+      "scenario": "Factory Capers",
+      "park_file": "/opt/rct2/Scenarios/Factory Capers.SC6",
+      "set": "base",
+      "difficulty": "beginner",
+      "goal": "Have **at least 1,100 guests in the park at the end of October, Year 3**. The park rating must also be at least 600 on that date.",
+      "minutes": 60,
+      "pass_check": "game reports scenario.status == 'completed'"
+    },
+    {
+      "id": "crazy-castle",
+      "scenario": "Crazy Castle",
+      "park_file": "/opt/rct2/Scenarios/Crazy Castle.SC6",
+      "set": "base",
+      "difficulty": "beginner",
+      "goal": "Have **at least 1,500 guests in the park at the end of October, Year 4**. The park rating must also be at least 600 on that date.",
+      "minutes": 60,
+      "pass_check": "game reports scenario.status == 'completed'"
+    },
+    {
+      "id": "dusty-greens",
+      "scenario": "Dusty Greens",
+      "park_file": "/opt/rct2/Scenarios/Dusty Greens.SC6",
+      "set": "base",
+      "difficulty": "beginner",
+      "goal": "Earn **\u00a35,000 or more from ride tickets in one game month**. Shop, food and entry money do not count. No deadline.",
+      "minutes": 60,
+      "pass_check": "game reports scenario.status == 'completed'"
+    },
+    {
+      "id": "bumbly-bazaar",
+      "scenario": "Bumbly Bazaar",
+      "park_file": "/opt/rct2/Scenarios/Bumbly Bazaar.SC6",
+      "set": "base",
+      "difficulty": "beginner",
+      "goal": "Earn **\u00a31,000 or more from food and drink sales in one game month**. No deadline.",
+      "minutes": 60,
+      "pass_check": "game reports scenario.status == 'completed'"
+    },
+    {
+      "id": "infernal-views",
+      "scenario": "Infernal Views",
+      "park_file": "/opt/rct2/Scenarios/Infernal Views.SC6",
+      "set": "base",
+      "difficulty": "challenging",
+      "goal": "Have **10 different types of roller coaster open, each with an excitement rating of at least 6.00**.",
+      "minutes": 60,
+      "pass_check": "game reports scenario.status == 'completed'"
+    },
+    {
+      "id": "lucky-lake",
+      "scenario": "Lucky Lake",
+      "park_file": "/opt/rct2/Scenarios/Lucky Lake.SC6",
+      "set": "base",
+      "difficulty": "challenging",
+      "goal": "Have **at least 2,100 guests in the park** with a **park rating of at least 700**. No deadline. If the rating stays under 700 for 4 weeks in a row (from the second month on), the game ends it as failed.",
+      "minutes": 60,
+      "pass_check": "game reports scenario.status == 'completed'"
+    },
+    {
+      "id": "botany-breakers",
+      "scenario": "Botany Breakers",
+      "park_file": "/opt/rct2/Scenarios/Botany Breakers.SC6",
+      "set": "base",
+      "difficulty": "challenging",
+      "goal": "Earn **\u00a310,000 or more from ride tickets in one game month**. Shop, food and entry money do not count. No deadline.",
+      "minutes": 60,
+      "pass_check": "game reports scenario.status == 'completed'"
+    },
+    {
+      "id": "alpine-adventures",
+      "scenario": "Alpine Adventures",
+      "park_file": "/opt/rct2/Scenarios/Alpine Adventures.SC6",
+      "set": "base",
+      "difficulty": "challenging",
+      "goal": "Earn **\u00a37,000 or more from ride tickets in one game month**. Shop, food and entry money do not count. No deadline.",
+      "minutes": 60,
+      "pass_check": "game reports scenario.status == 'completed'"
+    },
+    {
+      "id": "gravity-gardens",
+      "scenario": "Gravity Gardens",
+      "park_file": "/opt/rct2/Scenarios/Gravity Gardens.SC6",
+      "set": "base",
+      "difficulty": "expert",
+      "goal": "**Pay off the bank loan** and reach a **park value of at least \u00a3500,000**.",
+      "minutes": 60,
+      "pass_check": "game reports scenario.status == 'completed'"
+    },
+    {
+      "id": "extreme-heights",
+      "scenario": "Extreme Heights",
+      "park_file": "/opt/rct2/Scenarios/Extreme Heights.SC6",
+      "set": "base",
+      "difficulty": "expert",
+      "goal": "Have **at least 4,500 guests in the park** with a **park rating of at least 700**. No deadline. If the rating stays under 700 for 4 weeks in a row (from the second month on), the game ends it as failed.",
+      "minutes": 60,
+      "pass_check": "game reports scenario.status == 'completed'"
+    },
+    {
+      "id": "amity-airfield",
+      "scenario": "Amity Airfield",
+      "park_file": "/opt/rct2/Scenarios/Amity Airfield.SC6",
+      "set": "base",
+      "difficulty": "expert",
+      "goal": "Have **at least 3,000 guests in the park at the end of October, Year 4**. The park rating must also be at least 600 on that date.",
+      "minutes": 60,
+      "pass_check": "game reports scenario.status == 'completed'"
+    },
+    {
+      "id": "ghost-town",
+      "scenario": "Ghost Town",
+      "park_file": "/opt/rct2/Scenarios/Ghost Town.SC6",
+      "set": "base",
+      "difficulty": "expert",
+      "goal": "Have **10 different types of roller coaster open, each with an excitement rating of at least 7.00 and a track length of at least 1,200 m**.",
+      "minutes": 60,
+      "pass_check": "game reports scenario.status == 'completed'"
+    },
+    {
+      "id": "fungus-woods",
+      "scenario": "Fungus Woods",
+      "park_file": "/opt/rct2/Scenarios/Fungus Woods.SC6",
+      "set": "base",
+      "difficulty": "expert",
+      "goal": "Have **at least 2,500 guests in the park at the end of October, Year 4**. The park rating must also be at least 600 on that date.",
+      "minutes": 60,
+      "pass_check": "game reports scenario.status == 'completed'"
+    },
+    {
+      "id": "rainbow-summit",
+      "scenario": "Rainbow Summit",
+      "park_file": "/opt/rct2/Scenarios/Rainbow Summit.SC6",
+      "set": "base",
+      "difficulty": "expert",
+      "goal": "Have **at least 2,500 guests in the park at the end of October, Year 4**. The park rating must also be at least 600 on that date.",
+      "minutes": 60,
+      "pass_check": "game reports scenario.status == 'completed'"
+    }
+  ]
+}

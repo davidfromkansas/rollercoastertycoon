@@ -1,0 +1,8 @@
+{
+  "op": "action.execute",
+  "args": {
+    "action": "ridesetprice",
+    "args": { "ride": 0, "price": 20, "isPrimaryPrice": true },
+    "maxCost": 0
+  }
+}

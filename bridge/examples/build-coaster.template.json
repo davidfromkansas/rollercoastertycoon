@@ -1,0 +1,10 @@
+{
+  "op": "coaster.build",
+  "args": {
+    "planId": "PUT_THE_PLAN_ID_FROM_TRACK_PLAN_HERE",
+    "maxCost": 200000,
+    "name": "First Coaster",
+    "create": { "rideType": 0, "rideObject": 0, "entranceObject": 0, "colour1": 0, "colour2": 0, "inspectionInterval": 0 },
+    "test": false
+  }
+}

@@ -1,0 +1,181 @@
+<title>Solar Park Replay</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a park site plan on the left, a ledger of park numbers and controls on the right; stacks on phones. */
+:root {
+  --bg: #EEF1EA; --panel: #FFFFFF; --ink: #1E2A22; --muted: #5A665D; --line: #CDD5CA; --accent: #1F6F8B;
+  --ground: #C9D9B4; --tree: #7FA36A; --water: #6FA8C9; --path: #E5D3A8; --queue: #F2E6C4; --building: #A4A39B; --entrance: #E2584B; --guest: #1E2A22;
+  --display: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #141A16; --panel: #1C241F; --ink: #E4EBE3; --muted: #9FAEA3; --line: #2F3B33; --accent: #6FC0DC;
+  --ground: #2F4228; --tree: #4C6B3E; --water: #2F5E7A; --path: #8C7D58; --queue: #A69A72; --building: #6A6A64; --entrance: #F07466; --guest: #F4F1E6; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #141A16; --panel: #1C241F; --ink: #E4EBE3; --muted: #9FAEA3; --line: #2F3B33; --accent: #6FC0DC;
+  --ground: #2F4228; --tree: #4C6B3E; --water: #2F5E7A; --path: #8C7D58; --queue: #A69A72; --building: #6A6A64; --entrance: #F07466; --guest: #F4F1E6; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font-family: var(--mono); font-size: 14px; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-block: 28px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 20px; }
+header h1 { font-family: var(--display); font-weight: 700; font-size: 30px; margin: 0; text-wrap: balance; }
+header p { margin: 6px 0 0; color: var(--muted); max-width: 70ch; line-height: 1.5; }
+.main { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+.plan { flex: 999 1 520px; min-width: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px; position: relative; }
+canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; aspect-ratio: 1 / 1; max-width: 100%; }
+.tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12px; padding: 4px 8px; border-radius: 4px; white-space: nowrap; }
+.side { flex: 1 1 260px; min-width: 0; display: grid; gap: 16px; }
+.ledger { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 16px; display: grid; gap: 12px; }
+.date { font-family: var(--display); font-weight: 700; font-size: 20px; }
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.stat .k { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.stat .v { font-size: 20px; font-variant-numeric: tabular-nums; margin-top: 2px; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+button, select { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px 14px; min-height: 40px; cursor: pointer; }
+button.play { background: var(--accent); border-color: var(--accent); color: var(--panel); font-weight: 500; min-width: 88px; }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+.frame { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; font-size: 12px; }
+.legend span { display: flex; align-items: center; gap: 8px; }
+.sw { width: 14px; height: 14px; border-radius: 2px; flex: none; border: 1px solid var(--line); }
+.note { font-size: 12px; color: var(--muted); line-height: 1.5; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Solar Park Replay</h1>
+    <p>A top-down plan of the park drawn from the AI's own view of the game: tiles from the bridge's map, dots for guests. Recorded in the cloud, headless, at game speed 4.</p>
+  </header>
+  <div class="main">
+    <div class="plan" id="plan">
+      <canvas id="map" width="688" height="688" aria-label="Top-down map of the park with guests"></canvas>
+      <div class="tip" id="tip" hidden></div>
+    </div>
+    <div class="side">
+      <div class="ledger">
+        <div class="date" id="date">Year 1, March 1</div>
+        <div class="stats">
+          <div class="stat"><div class="k">Guests</div><div class="v" id="guests">0</div></div>
+          <div class="stat"><div class="k">Cash</div><div class="v" id="cash">$0</div></div>
+          <div class="stat"><div class="k">Park rating</div><div class="v" id="rating">0</div></div>
+          <div class="stat"><div class="k">Guests shown</div><div class="v" id="dots">0</div></div>
+        </div>
+        <div class="controls">
+          <button class="play" id="play" type="button">Pause</button>
+          <label for="speed" class="frame">Speed</label>
+          <select id="speed"><option value="1000">1x</option><option value="500" selected>2x</option><option value="250">4x</option></select>
+        </div>
+        <input type="range" id="scrub" min="0" max="0" value="0" aria-label="Frame">
+        <div class="frame" id="frame">Frame 1 of 1</div>
+      </div>
+      <div class="ledger">
+        <div class="legend">
+          <span><i class="sw" style="background: var(--ground)"></i>Ground</span>
+          <span><i class="sw" style="background: var(--tree)"></i>Trees, scenery</span>
+          <span><i class="sw" style="background: var(--water)"></i>Water</span>
+          <span><i class="sw" style="background: var(--path)"></i>Path</span>
+          <span><i class="sw" style="background: var(--queue)"></i>Queue line</span>
+          <span><i class="sw" style="background: var(--building)"></i>Building</span>
+          <span><i class="sw" style="background: hsl(200 60% 50%)"></i>Ride (one colour each)</span>
+          <span><i class="sw" style="background: var(--entrance)"></i>Ride entrance</span>
+        </div>
+        <p class="note" id="recnote">Hover a ride to see its name.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="application/json" id="recording">__RECORDING__</script>
+<script>
+(() => {
+  const rec = JSON.parse(document.getElementById('recording').textContent);
+  const W = rec.width, H = rec.height;
+  const months = ['March', 'April', 'May', 'June', 'July', 'August', 'September', 'October'];
+  const rideName = new Map(rec.rides.map(r => [r.id, r.name]));
+  const canvas = document.getElementById('map');
+  const ctx = canvas.getContext('2d');
+  const scale = Math.max(2, Math.floor(688 / Math.max(W, H)));
+  canvas.width = W * scale; canvas.height = H * scale;
+
+  // Rebuild full frames: rows and ride tiles are only stored when they change.
+  let rows = [], rideTiles = [];
+  const frames = rec.frames.map(f => {
+    if (f.rows) rows = f.rows;
+    if (f.rideTiles) rideTiles = f.rideTiles;
+    return { ...f, rows, rideTiles };
+  });
+
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  let palette;
+  const readPalette = () => {
+    palette = { '.': css('--ground'), t: css('--tree'), '~': css('--water'), '#': css('--path'), '=': css('--queue'), B: css('--building'), E: css('--entrance'), guest: css('--guest') };
+  };
+  const rideColour = id => `hsl(${(id * 137.5) % 360} 62% 52%)`;
+
+  let index = 0, playing = true, timer = null;
+  const $ = id => document.getElementById(id);
+  const scrub = $('scrub');
+  scrub.max = String(frames.length - 1);
+
+  function draw() {
+    const f = frames[index];
+    for (let y = 0; y < H; y++) {
+      const row = f.rows[y];
+      for (let x = 0; x < W; x++) {
+        const c = row[x];
+        ctx.fillStyle = c === 'R' ? palette.B : (palette[c] || palette['.']);
+        ctx.fillRect(x * scale, y * scale, scale, scale);
+      }
+    }
+    for (const [x, y, ride] of f.rideTiles) {
+      ctx.fillStyle = f.rows[y][x] === 'E' ? palette.E : rideColour(ride);
+      ctx.fillRect(x * scale, y * scale, scale, scale);
+    }
+    ctx.fillStyle = palette.guest;
+    const r = Math.max(1, scale / 3);
+    for (const [x, y] of f.people || []) {
+      // spread guests a little inside their tile so crowds read as crowds
+      const jx = ((x * 7 + y * 13) % 3) / 3, jy = ((x * 11 + y * 5) % 3) / 3;
+      ctx.fillRect(x * scale + jx * (scale - r), y * scale + jy * (scale - r), r, r);
+    }
+    const d = f.date;
+    $('date').textContent = `Year ${Math.floor(d.monthsElapsed / 8) + 1}, ${months[d.month] || ''} ${d.day}`;
+    $('guests').textContent = f.guests.toLocaleString();
+    $('cash').textContent = '$' + Math.round(f.cash / 10).toLocaleString();
+    $('rating').textContent = String(f.rating);
+    $('dots').textContent = (f.people || []).length.toLocaleString();
+    $('frame').textContent = `Frame ${index + 1} of ${frames.length}`;
+    scrub.value = String(index);
+  }
+
+  function schedule() {
+    clearInterval(timer);
+    if (playing) timer = setInterval(() => { index = (index + 1) % frames.length; draw(); }, Number($('speed').value));
+    $('play').textContent = playing ? 'Pause' : 'Play';
+  }
+  $('play').addEventListener('click', () => { playing = !playing; schedule(); });
+  $('speed').addEventListener('change', schedule);
+  scrub.addEventListener('input', () => { index = Number(scrub.value); playing = false; schedule(); draw(); });
+
+  const tip = $('tip');
+  canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.floor((e.clientX - rect.left) / rect.width * W);
+    const y = Math.floor((e.clientY - rect.top) / rect.height * H);
+    const hit = frames[index].rideTiles.find(t => t[0] === x && t[1] === y);
+    if (!hit) { tip.hidden = true; return; }
+    tip.textContent = rideName.get(hit[2]) || `Ride ${hit[2]}`;
+    tip.hidden = false;
+    tip.style.left = (e.clientX - rect.left + 20) + 'px';
+    tip.style.top = (e.clientY - rect.top + 4) + 'px';
+  });
+  canvas.addEventListener('mouseleave', () => { tip.hidden = true; });
+
+  readPalette();
+  if (window.matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readPalette(); draw(); });
+  new MutationObserver(() => { readPalette(); draw(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) playing = false;
+  draw();
+  schedule();
+})();
+</script>
