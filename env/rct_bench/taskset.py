@@ -110,6 +110,14 @@ class RctTask(vf.Task[RctData]):
             "tar -czf /tmp/keep.tgz -C /tmp keep"
         )
         await runtime.run(["bash", "-c", pack], {})
+
+        # The AI's notebook, copied into the trace so it shows on Prime's Evaluations page (trace info).
+        try:
+            await runtime.write("/root/rec/notebook.js", (files("rct_bench") / "notebook.js").read_bytes())
+            result = await runtime.run(["node", "/root/rec/notebook.js", f"{PLAY}/notebook"], {})
+            trace.info["notebook"] = json.loads(result.stdout or "{}")
+        except Exception as e:  # the notebook copy must never fail the run
+            print(f"rct-bench: could not copy the notebook into the trace: {e}")
         out = Path(os.environ.get("RCT_FILES_DIR", "rct-files"))
         out.mkdir(parents=True, exist_ok=True)
         try:
