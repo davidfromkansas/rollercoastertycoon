@@ -121,9 +121,26 @@ if [ -s /root/rec/banner.txt ]; then
     LAYOUT="${LAYOUT%\[out\]}[main];[main]pad=1920:776:0:56:color=0x0f1a24,\
 drawtext=fontfile=$SANS:textfile=/root/rec/banner.txt:expansion=none:fontcolor=white:fontsize=26:x=(w-text_w)/2:y=15[out]"
 fi
+# Optional live stream to Twitch: only when the run was given a stream key (TWITCH_STREAM_KEY on the runner).
+# The same video goes to the recording and to Twitch; if Twitch drops, the recording carries on.
+TWITCH=()
+if [ -s /tmp/rct-twitch.key ]; then
+    mv /tmp/rct-twitch.key /root/rec/twitch.key && chmod 600 /root/rec/twitch.key
+    KEY=$(tr -d ' \r\n' < /root/rec/twitch.key)
+    TWITCH=(-f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100)
+fi
+if [ ${#TWITCH[@]} -gt 0 ]; then
+    setsid nohup ffmpeg -nostdin -loglevel error -f x11grab -framerate 10 -video_size 1280x720 -i :99 \
+        "${PANEL_INPUT[@]}" "${TWITCH[@]}" -filter_complex "$LAYOUT" -map '[out]' -map "$(( ${#PANEL_INPUT[@]} > 0 ? 2 : 1 )):a" \
+        -c:v libx264 -preset ultrafast -crf 28 -maxrate 3000k -bufsize 6000k -g 20 -pix_fmt yuv420p -c:a aac -b:a 64k -flags +global_header \
+        -f tee "[select=v:f=matroska]/root/rec/run.mkv|[f=flv:onfail=ignore]rtmp://live.twitch.tv/app/$KEY" \
+        >/root/rec/ffmpeg.log 2>&1 < /dev/null &
+    unset KEY
+else
 setsid nohup ffmpeg -nostdin -loglevel error -f x11grab -framerate 10 -video_size 1280x720 -i :99 \
     "${PANEL_INPUT[@]}" -filter_complex "$LAYOUT" -map '[out]' \
     -c:v libx264 -preset ultrafast -crf 28 -pix_fmt yuv420p -y /root/rec/run.mkv >/root/rec/ffmpeg.log 2>&1 < /dev/null &
+fi
 echo $! > /root/rec/pid
 sleep 2
 kill -0 "$(cat /root/rec/pid)" 2>/dev/null || { echo "screen recorder did not start:"; cat /root/rec/ffmpeg.log; }

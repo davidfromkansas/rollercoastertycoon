@@ -72,6 +72,9 @@ class RctTask(vf.Task[RctData]):
         await runtime.write("/tmp/rct-panel.js", (files("rct_bench") / "panel.js").read_bytes())
         info = {"scenario": self.data.scenario, "goal": self.data.goal}
         await runtime.write("/tmp/rct-panel-info.json", json.dumps(info).encode())
+        # Optional live stream: the runner's Twitch key goes only to root's recorder (never the AI's folder).
+        if os.environ.get("TWITCH_STREAM_KEY"):
+            await runtime.write("/tmp/rct-twitch.key", os.environ["TWITCH_STREAM_KEY"].encode())
         update = bridge_update()
         if update:
             await runtime.write("/tmp/rct-bridge-update.tgz", update)
