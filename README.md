@@ -64,14 +64,6 @@ vf-eval rct-bench -m claude-opus-5-5 \
 - Videos and the AI's files land in `./rct-files` (change with `RCT_FILES_DIR`). Add `--no-push` to skip uploading results to your Prime Evaluations page.
 - To use Prime's model service instead of your own key, drop the two `--client` flags and use a Prime model name.
 
-### 5. Check the run for harness problems
-
-```bash
-python3 env/rct_bench/run_check.py runs/<run folder>/traces.jsonl --md run-check.md
-```
-
-It lists anything that came from the harness rather than the game: messages Claude Code added, commands it blocked, bridge errors and empty fields, whether the AI stopped early, and game warnings that kept repeating. A clean run lists nothing under checks 1, 2, 4 and 5.
-
 **Tip:** run `vf-eval` from a small Prime sandbox (for example `python:3.12-slim`) if your own network blocks Prime's sandbox connections. Start it with `setsid nohup` so it survives your session.
 
 ## Costs (one example)
