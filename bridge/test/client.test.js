@@ -83,3 +83,18 @@ test('a clear message when the game is not running', async () => {
     assert.match(result.stderr, /Is the game running/);
     fs.rmSync(dir, { recursive: true, force: true });
 });
+
+test('every command can show the real time left in a timed run', () => {
+    const fs = require('node:fs');
+    const path = require('node:path');
+    const { timeLeft } = require('../cli.js');
+    const file = path.join(__dirname, '..', 'run-clock.json');
+    assert.strictEqual(fs.existsSync(file), false);
+    assert.strictEqual(timeLeft(), '');
+    fs.writeFileSync(file, JSON.stringify({ minutes: 60, endsAt: Math.floor(Date.now() / 1000) + 25 * 60 + 30 }));
+    try {
+        assert.strictEqual(timeLeft(), '25 of 60 minutes left in your run (real time)');
+    } finally {
+        fs.unlinkSync(file);
+    }
+});

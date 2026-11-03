@@ -25,10 +25,12 @@ Look (safe, always allowed):
   hello                      bridge status, game API version, current session
   park                       money, guests, rating, scenario goal, date
   rides | ride '{"ride":3}'  ride stats
+  overview '{"land":true}'   the whole park as a map, one character per tile, with upkeep problems
   map '{"x":60,"y":60,"width":8,"height":8}'   tiles (map squares) in an area
   guests | staff '{"offset":0,"limit":50}'
   objects '{"type":"ride"}'  things loaded in this park (rides, scenery, ...)
   schema [ACTION]            allowed game actions and their arguments
+  Every command also shows the real time left in your run as timeLeft (on timed runs).
   capture                    save a screenshot (a copy goes in screenshots/ here)
   news '{"limit":50}'        all game messages, newest first (warning: true = red warning)
                              Every command also shows new game messages since your last command as gameNews.
@@ -145,6 +147,18 @@ function unseenNews(recent) {
     return fresh.map(n => ({ month: n.month, day: n.day, type: n.type, warning: n.warning, text: n.text }));
 }
 
+// The run's real-time clock, like a clock on the wall. run-clock.json is written next to this helper when a
+// timed run starts ({"minutes": 60, "endsAt": unix seconds}); on untimed runs it is absent and nothing is shown.
+function timeLeft() {
+    try {
+        const c = JSON.parse(fs.readFileSync(path.join(ROOT, 'run-clock.json'), 'utf8'));
+        const left = Math.max(0, Math.floor((c.endsAt * 1000 - Date.now()) / 60000));
+        return `${left} of ${c.minutes} minutes left in your run (real time)`;
+    } catch (e) {
+        return '';
+    }
+}
+
 function showNews(reply) {
     if (!reply || !Array.isArray(reply.recentNews)) return;
     const fresh = unseenNews(reply.recentNews);
@@ -216,6 +230,8 @@ async function main(argv) {
     if (command === 'stop' && fs.existsSync(SESSION_FILE)) fs.unlinkSync(SESSION_FILE);
 
     showNews(reply);
+    const clock = timeLeft();
+    if (clock) reply.timeLeft = clock;
     console.log(JSON.stringify(reply, null, 2));
     if (!reply.ok || (isChange && reply.result && NOT_DONE_STATES.includes(reply.result.state))) process.exitCode = 1;
 }
@@ -223,8 +239,10 @@ async function main(argv) {
 if (require.main === module) {
     main(process.argv.slice(2)).catch(e => {
         console.error(e.message);
+        const clock = timeLeft();
+        if (clock) console.error(clock);
         process.exitCode = 1;
     });
 }
 
-module.exports = { send, writeOnce, main, readConfig, unseenNews };
+module.exports = { send, writeOnce, main, readConfig, unseenNews, timeLeft };

@@ -87,6 +87,13 @@ class RctTask(vf.Task[RctData]):
              ">/root/rec/camera.log 2>&1 < /dev/null & echo $! > /root/rec/camera.pid"],
             {},
         )
+        # The run's clock, for wait.js to show the real time left (like a clock on the wall).
+        # Stamped as the AI is about to start; its time limit starts then too.
+        clock = (
+            f"printf '{{\"minutes\": %d, \"endsAt\": %d}}\\n' {self.data.minutes} $(( $(date +%s) + {self.data.minutes * 60} ))"
+            f" > {PLAY}/run-clock.json && chmod 644 {PLAY}/run-clock.json"
+        )
+        await runtime.run(["bash", "-c", clock], {})
         # Optional extra copy of the handbook (data/rct2-guide.md; not in the public repo).
         guide = DATA / "rct2-guide.md"
         if guide.is_file():
