@@ -109,9 +109,21 @@
                 'minimumWaitingTime', 'maximumWaitingTime']);
             // Colours and music are only shown for one ride at a time; they're slow to read for hundreds.
             if (full) Object.assign(view, pick(r, ['departFlags', 'music', 'colourSchemes', 'vehicleColours', 'stationStyle']));
+            // The game keeps a slot for every possible station; unused ones have no start, entrance or exit.
+            // Flat rides and shops have a station of length 0, so length can't be used to spot unused slots.
             view.stations = (r.stations || [])
                 .map((s, index) => Object.assign({ index }, pick(s, ['start', 'length', 'entrance', 'exit', 'queueTime'])))
-                .filter(s => s.length > 0);
+                .filter(s => s.start || s.entrance || s.exit);
+            // A player sees at a glance when an entrance or exit has no path to it; say so in words.
+            const warnings = [];
+            for (const s of view.stations) {
+                if (r.classification === 'stall' || r.classification === 'facility') break;
+                if (!s.entrance) warnings.push(`Station ${s.index} has no entrance.`);
+                else if (!joinedToPath(s.entrance)) warnings.push(`The entrance of station ${s.index} is not joined to a path.`);
+                if (!s.exit) warnings.push(`Station ${s.index} has no exit.`);
+                else if (!joinedToPath(s.exit)) warnings.push(`The exit of station ${s.index} is not joined to a path.`);
+            }
+            if (warnings.length) view.warnings = warnings;
             return view;
         }
 
@@ -122,15 +134,126 @@
             return ride;
         }
 
-        function describeTile(x, y) {
+        // ---- What a player sees by looking at the park, put into words ----
+        // The tile one step away in each direction 0-3 (the game's CoordsDirectionDelta, world/Map.cpp).
+        // Path edges use the same numbering: edge bit d joins the path to the tile one step in direction d.
+        const STEP = [[-1, 0], [0, 1], [1, 0], [0, -1]];
+        const neighbours = (x, y, mask) => STEP.filter((s, d) => mask & (1 << d)).map(s => [x + s[0], y + s[1]]);
+
+        // Land ownership bits (OwnershipFlag in world/MapOwnership.h): 1 building rights owned, 2 land owned,
+        // 4 building rights for sale, 8 land for sale.
+        function landWords(o) {
+            if (o & 2) return 'owned';
+            if (o & 1) return 'building rights only (you can build above or below, not on it)';
+            if (o & 8) return 'for sale';
+            if (o & 4) return 'building rights for sale';
+            return 'not owned';
+        }
+
+        // Grass length (GrassLength in world/tile_element/SurfaceElement.h): 0 mown, 1-3 short, 4-6 long clumps.
+        const grassWords = g => (g >= 4 ? 'long' : g === 0 ? 'mown' : 'short');
+
+        // Flower beds and other scenery that can wilt look wilted from age 40 and dead from 55
+        // (kSceneryWitherAgeThreshold1/2 in world/Scenery.h, drawn in paint/tile_element/Paint.SmallScenery.cpp).
+        const CAN_WITHER = 1 << 5;  // SmallSceneryFlag::canWither (object/SmallSceneryEntry.h)
+        const objectCache = {};
+        function objectInfo(type, index) {
+            const key = type + ':' + index;
+            if (!has(objectCache, key)) {
+                let info = null;
+                try {
+                    const o = objectManager.getObject(type, index);
+                    if (o) info = { name: o.name, flags: o.flags || 0 };
+                } catch (e) { /* unknown object */ }
+                objectCache[key] = info;
+            }
+            return objectCache[key];
+        }
+        function gardenWords(el) {
+            const info = objectInfo('small_scenery', el.object);
+            if (!info || !(info.flags & CAN_WITHER)) return null;
+            return el.age >= 55 ? 'dead (needs watering)' : el.age >= 40 ? 'wilting (needs watering)' : 'fresh';
+        }
+
+        // What's on a path tile, as a player would see it: bench, bin, lamp; broken; a full bin.
+        function pathItem(el) {
+            if (el.addition === null || el.addition === undefined) return null;
+            const info = objectInfo('footpath_addition', el.addition);
+            const item = { name: info ? info.name : 'item ' + el.addition };
+            if (el.isAdditionBroken) item.broken = true;
+            if (el.isAdditionFull) item.full = true;
+            return item;
+        }
+
+        // Litter and vomit lying in the park, grouped by tile. Off-map entities have negative positions.
+        function litterByTile() {
+            const tiles = {};
+            let litter = 0, vomit = 0;
+            for (const l of map.getAllEntities('litter') || []) {
+                if (!(l.x >= 0 && l.y >= 0)) continue;
+                const isVomit = /^vomit/.test(l.litterType || '');
+                if (isVomit) vomit++; else litter++;
+                const key = Math.floor(l.x / 32) + ',' + Math.floor(l.y / 32);
+                const t = tiles[key] || (tiles[key] = { litter: 0, vomit: 0 });
+                if (isVomit) t.vomit++; else t.litter++;
+            }
+            return { litter, vomit, tiles };
+        }
+
+        const ELEMENT_KEYS = {
+            surface: ['slope', 'waterHeight', 'surfaceStyle', 'edgeStyle', 'ownership', 'grassLength'],
+            footpath: ['object', 'surfaceObject', 'railingsObject', 'edges', 'slopeDirection', 'isQueue', 'isWide', 'queueBannerDirection', 'ride', 'station'],
+            track: ['direction', 'ride', 'station', 'trackType', 'sequence', 'hasChainLift', 'isInverted'],
+            entrance: ['direction', 'object', 'ride', 'station', 'sequence'],
+            small_scenery: ['direction', 'object', 'quadrant', 'age'],
+            large_scenery: ['direction', 'object'],
+            wall: ['direction', 'object'],
+            banner: ['direction'],
+        };
+        function describeElement(el, x, y, elementIndex) {
+            const view = Object.assign({ elementIndex }, pick(el, ['type', 'baseZ', 'clearanceZ']),
+                pick(el, ELEMENT_KEYS[el.type] || []));
+            if (el.type === 'surface') {
+                view.land = landWords(el.ownership || 0);
+                view.grass = grassWords(el.grassLength || 0);
+            } else if (el.type === 'footpath') {
+                view.joinsTo = neighbours(x, y, el.edges || 0);
+                if (el.slopeDirection !== null && el.slopeDirection !== undefined) {
+                    const s = STEP[el.slopeDirection];
+                    view.slopesUpToward = [x + s[0], y + s[1]];
+                }
+                const item = pathItem(el);
+                if (item) view.item = item;
+            } else if (el.type === 'small_scenery') {
+                const g = gardenWords(el);
+                if (g) view.garden = g;
+            }
+            return view;
+        }
+
+        function describeTile(x, y, litter) {
             const tile = map.getTile(x, y);
-            return {
-                x, y,
-                elements: tile.elements.map((el, elementIndex) => Object.assign({ elementIndex }, pick(el, ['type',
-                    'baseZ', 'clearanceZ', 'slope', 'waterHeight', 'ownership', 'surfaceStyle', 'edgeStyle', 'direction',
-                    'ride', 'station', 'trackType', 'sequence', 'hasChainLift', 'isInverted', 'edges', 'isQueue', 'isWide',
-                    'queueBannerDirection', 'object', 'quadrant']))),
-            };
+            const view = { x, y, elements: tile.elements.map((el, i) => describeElement(el, x, y, i)) };
+            const l = litter && litter.tiles[x + ',' + y];
+            if (l) view.onTheGround = l;
+            return view;
+        }
+
+        // Is a ride entrance or exit at this tile joined to a path? True when a path next to it has an edge
+        // pointing into it at about the same height, which is how the game links them.
+        function joinedToPath(pos) {
+            if (!pos) return null;
+            const tx = Math.floor(pos.x / 32), ty = Math.floor(pos.y / 32), z = pos.z;
+            for (let d = 0; d < 4; d++) {
+                const nx = tx + STEP[d][0], ny = ty + STEP[d][1];
+                if (nx < 0 || ny < 0 || nx >= map.size.x || ny >= map.size.y) continue;
+                const back = (d + 2) % 4;
+                for (const el of map.getTile(nx, ny).elements) {
+                    // baseZ and z are both in world units (8 per height step); a sloped path may sit one step lower.
+                    if (el.type === 'footpath' && (el.edges & (1 << back)) && Math.abs(el.baseZ - z) <= 16) return true;
+                }
+            }
+            return false;
         }
 
         function describeSegment(s) {
@@ -214,6 +337,10 @@
                 noMoney: flag('noMoney'),
                 parkOpen: flag('open'),
             };
+            // Litter and vomit lying around, which a player sees on the paths.
+            const litter = litterByTile();
+            parkView.litterOnGround = litter.litter;
+            parkView.vomitOnGround = litter.vomit;
             const scenarioView = pick(scenario, ['name', 'status']);
             scenarioView.objective = pick(scenario.objective || {}, ['type', 'guests', 'year', 'length', 'excitement', 'parkValue', 'monthlyIncome']);
             return {
@@ -267,58 +394,128 @@
             const h = a.height === undefined ? 1 : C.int(a.height, 'height', 1, 32);
             if (x + w > map.size.x || y + h > map.size.y) fail('That area goes past the edge of the map');
             const tiles = [];
+            const litter = litterByTile();
             for (let ty = y; ty < y + h; ty++) {
-                for (let tx = x; tx < x + w; tx++) tiles.push(describeTile(tx, ty));
+                for (let tx = x; tx < x + w; tx++) tiles.push(describeTile(tx, ty, litter));
             }
             return tiles;
         }
 
-        // A whole-map summary: one character per tile, plus ride tiles and guest positions.
+        // A whole-park map: one character per tile, rows top to bottom are y = 0, 1, 2 ...; columns are x.
+        // Paths are drawn with lines showing which neighbours they join, so a gap in a line is a real gap.
         // Small enough to read in one go, and works without graphics (headless).
-        //   ~ water   . ground   # path   = queue   R ride/track   E entrance
-        //   B building (large scenery)   t tree/small scenery
+        // Path joins by edge bits (1 = toward x-1, 2 = toward y+1, 4 = toward x+1, 8 = toward y-1), as drawn on the map.
+        const PATH_CHARS = '·╴╷┐╶─┌┬╵┘│┤└┴├┼';
+        const QUEUE_CHARS = '=═║╗══╔╦║╝║╣╚╩╠╬';
+        const LEGEND = 'Rows are y (top row y=0), columns are x. ~ water, . ground, t tree or small scenery, B building, ' +
+            'R ride or track, E ride entrance, X ride exit, P park entrance. Paths are lines (─ │ ┌ ┼ ...) and queues double lines ' +
+            '(═ ║ ╔ ╬ ...) that show which neighbouring tiles each one joins; · or = is a path or queue joined to nothing. ' +
+            'Land (with "land": true): o owned, r building rights only, $ for sale, s building rights for sale, - not owned.';
         function overview(a) {
             const width = map.size.x;
             const height = map.size.y;
             const rows = [];
             const heights = [];
+            const land = [];
             const rideTiles = [];
+            // Which entrance tiles are ride entrances and which are exits, from each ride's stations.
+            // Any other entrance tile is the park's own entrance.
+            const doors = {};
+            const rideNames = {};
+            const tileKey = p => Math.floor(p.x / 32) + ',' + Math.floor(p.y / 32);
+            for (const r of map.rides || []) {
+                rideNames[r.id] = r.name;
+                for (const st of r.stations || []) {
+                    if (st.entrance) doors[tileKey(st.entrance)] = 'E';
+                    if (st.exit) doors[tileKey(st.exit)] = 'X';
+                }
+            }
+            const upkeep = { brokenPathItems: [], fullBins: [], wiltingGardens: [], longGrassTiles: 0 };
             for (let y = 0; y < height; y++) {
                 let row = '';
+                let lrow = '';
                 const hrow = [];
                 for (let x = 0; x < width; x++) {
                     let code = '.';
                     let rank = 0;
                     let ride = null;
                     let ground = 0;
+                    let owned = '-';
                     const set = (c, r) => { if (r > rank) { code = c; rank = r; } };
                     for (const el of map.getTile(x, y).elements) {
                         switch (el.type) {
-                            case 'surface':
+                            case 'surface': {
                                 ground = el.baseZ;
                                 if (el.waterHeight > el.baseZ) set('~', 1);
+                                const o = el.ownership || 0;
+                                owned = o & 2 ? 'o' : o & 1 ? 'r' : o & 8 ? '$' : o & 4 ? 's' : '-';
+                                if ((el.grassLength || 0) >= 4 && o & 3) upkeep.longGrassTiles++;
                                 break;
-                            case 'small_scenery': set('t', 2); break;
+                            }
+                            case 'small_scenery': {
+                                set('t', 2);
+                                const g = gardenWords(el);
+                                if (g && g !== 'fresh') upkeep.wiltingGardens.push([x, y]);
+                                break;
+                            }
                             case 'large_scenery': set('B', 3); break;
-                            case 'footpath': set(el.isQueue ? '=' : '#', 4); break;
+                            case 'footpath': {
+                                set((el.isQueue ? QUEUE_CHARS : PATH_CHARS)[(el.edges || 0) & 15], 4);
+                                const item = pathItem(el);
+                                if (item && item.broken) upkeep.brokenPathItems.push([x, y, item.name]);
+                                if (item && item.full) upkeep.fullBins.push([x, y]);
+                                break;
+                            }
                             case 'track':
                                 set('R', 5);
                                 ride = el.ride;
                                 break;
                             case 'entrance':
-                                set('E', 6);
-                                if (el.ride !== undefined && el.ride !== null) ride = el.ride;
+                                if (doors[x + ',' + y]) {
+                                    set(doors[x + ',' + y], 6);
+                                    ride = el.ride;
+                                } else {
+                                    set('P', 6);
+                                }
                                 break;
                         }
                     }
                     row += code;
+                    lrow += owned;
                     hrow.push(ground);
-                    if ((code === 'R' || code === 'E') && Number.isInteger(ride)) rideTiles.push([x, y, ride]);
+                    if ((code === 'R' || code === 'E' || code === 'X') && Number.isInteger(ride)) rideTiles.push([x, y, ride]);
                 }
                 rows.push(row);
+                land.push(lrow);
                 heights.push(hrow);
             }
-            const result = { width, height, legend: '~ water, . ground, # path, = queue, R ride, E entrance, B building, t tree/scenery', rows, rideTiles };
+            const litter = litterByTile();
+            const dirty = Object.keys(litter.tiles).map(k => {
+                const [x, y] = k.split(',').map(Number);
+                return [x, y, litter.tiles[k].litter, litter.tiles[k].vomit];
+            }).sort((p, q) => (q[2] + q[3]) - (p[2] + p[3]));
+            const problems = [];
+            for (const r of map.rides || []) {
+                if (r.classification === 'stall' || r.classification === 'facility') continue;
+                for (const w of describeRide(r, false).warnings || []) problems.push(`${r.name} (ride ${r.id}): ${w}`);
+            }
+            const result = {
+                width, height, legend: LEGEND, rows, rideTiles, rideNames,
+                upkeep: {
+                    litter: litter.litter, vomit: litter.vomit,
+                    dirtiestTiles: dirty.slice(0, 20).map(d => ({ x: d[0], y: d[1], litter: d[2], vomit: d[3] })),
+                    // Lists show at most 50 places; the count says how many there are in all.
+                    brokenPathItemCount: upkeep.brokenPathItems.length,
+                    brokenPathItems: upkeep.brokenPathItems.slice(0, 50).map(b => ({ x: b[0], y: b[1], item: b[2] })),
+                    fullBinCount: upkeep.fullBins.length,
+                    fullBins: upkeep.fullBins.slice(0, 50).map(b => ({ x: b[0], y: b[1] })),
+                    wiltingGardenCount: upkeep.wiltingGardens.length,
+                    wiltingGardens: upkeep.wiltingGardens.slice(0, 50).map(b => ({ x: b[0], y: b[1] })),
+                    longGrassTiles: upkeep.longGrassTiles,
+                },
+                problems,
+            };
+            if (a.land) result.land = land;
             if (a.heights) result.heights = heights;
             if (a.guests) {
                 result.guests = map.getAllEntities('guest')
@@ -452,7 +649,10 @@
         function readHistory(a) {
             const every = a.every === undefined ? 1 : C.int(a.every, 'every', 1, 365);
             const rows = history.filter((h, i) => (history.length - 1 - i) % every === 0);
-            return { note: 'One row per game day since the bridge started watching this park, oldest first.', rows: rows.slice(-500) };
+            const shown = rows.slice(-500);
+            const note = 'One row per game day since the bridge started watching this park, oldest first.' +
+                (shown.length < rows.length ? ` Only the newest 500 of ${rows.length} rows are shown; use a bigger "every" to see further back.` : '');
+            return { note, rows: shown };
         }
 
         // Adverts the agent started, so it can see what is still running (the game doesn't tell plugins).

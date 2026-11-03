@@ -55,12 +55,19 @@ export MY_ANTHROPIC_KEY=...       # your model key (any variable name)
 vf-eval rct-bench -m claude-opus-5-5 \
   --client.base-url https://api.anthropic.com/v1 --client.api-key-var MY_ANTHROPIC_KEY \
   --env.agent.harness.id claude_code --env.agent.harness.version 2.1.316 \
+  --env.agent.harness.env.CLAUDE_CODE_MODEL_CAPABILITIES=-silent_turn_reminder,-total_tokens_reminder,-elapsed_time_reminder \
+  --env.agent.harness.env.CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1 \
+  --env.agent.harness.env.CLAUDE_CODE_EFFORT_LEVEL=unset \
+  --sampling.thinking.type adaptive --sampling.thinking.display summarized \
   --select.include.ids electric-fields
 ```
 
 - `--select.include.ids` picks tasks (ids are in `env/rct_bench/data/base-game.json`); leave it out to run all 15.
 - `--env.taskset.minutes 5` makes a short test run.
 - `--env.agent.harness.version` sets the Claude Code version; newer models need a recent one.
+- The two `--env.agent.harness.env` lines switch off Claude Code habits meant for a person at the keyboard: notes that "the user hasn't heard from you", "tokens left" and "time elapsed" counters (each sent only to some models), and blocking `sleep` commands. Nobody is watching a benchmark run, and every model should get the same messages. (Claude Code reads these switches only when it starts, so they can't go in a settings file.)
+- `CLAUDE_CODE_EFFORT_LEVEL=unset` lets each model think at its own default effort, as Anthropic sets it (Claude Code otherwise asks every model for "medium", which is below Sonnet 5.5's default of "high").
+- `--sampling.thinking...` asks Anthropic for a readable summary of the AI's thinking, saved in the trace. Without it Claude Code asks for none, and you only get the short notes some models choose to write. It doesn't change how the model thinks.
 - Videos and the AI's files land in `./rct-files` (change with `RCT_FILES_DIR`). Add `--no-push` to skip uploading results to your Prime Evaluations page.
 - To use Prime's model service instead of your own key, drop the two `--client` flags and use a Prime model name.
 

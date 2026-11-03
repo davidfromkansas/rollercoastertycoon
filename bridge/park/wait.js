@@ -2,10 +2,10 @@
 // Prints new game messages as they arrive.
 // Usage: node wait.js [--max-minutes 1.75] [--cash-floor 1000]
 // The default stops before 2 real minutes, so it finishes inside a command's usual 2-minute limit.
-// Prints one line per game month seen while waiting, then why it stopped.
+// Prints one line per game month seen while waiting, then why it stopped and how much real time the run has left.
 'use strict';
 const crypto = require('node:crypto');
-const { send, readConfig, unseenNews } = require('./cli.js');
+const { send, readConfig, unseenNews, timeLeft } = require('./cli.js');
 
 const argv = process.argv.slice(2);
 const option = (name, fallback) => {
@@ -45,7 +45,7 @@ function line(p) {
     let lastGuests = p.park.guests;
     let falls = 0;
     console.log('Now: ' + line(p));
-    const stop = reason => { console.log('Stopped waiting: ' + reason); process.exit(0); };
+    const stop = reason => { console.log('Stopped waiting: ' + reason); const t = timeLeft(); if (t) console.log('Real time: ' + t); process.exit(0); };
     if (p.paused) stop('the game is paused (nothing happens until you unpause it)');
     while (Date.now() - start < maxMs) {
         await sleep(5000);

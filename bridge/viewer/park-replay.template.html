@@ -123,7 +123,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
       const row = f.rows[y];
       for (let x = 0; x < W; x++) {
         const c = row[x];
-        ctx.fillStyle = c === 'R' ? palette.B : (palette[c] || palette['.']);
+        ctx.fillStyle = c === 'R' ? palette.B : '·╴╷┐╶─┌┬╵┘│┤└┴├┼'.includes(c) ? palette['#'] : '═║╗╔╦╝╣╚╩╠╬'.includes(c) ? palette['='] : 'XP'.includes(c) ? palette.E : (palette[c] || palette['.']);
         ctx.fillRect(x * scale, y * scale, scale, scale);
       }
     }

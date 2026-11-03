@@ -45,6 +45,12 @@ mkdir -p "$A/notebook"
 node -e 'const f=process.argv[1],c=JSON.parse(require("fs").readFileSync(f));c.userDataPath=process.argv[2];require("fs").writeFileSync(f,JSON.stringify(c,null,2))' "$A/bridge.config.json" "$B/user-data"
 chown -R agent:agent "$A"
 chmod 600 "$A/bridge.config.json"
+# Claude Code is built for coding with a person, and adds git commit/PR attribution notes to the AI's
+# conversation. Nobody here uses git, so switch those off (read by Claude Code as this folder's local settings).
+# The run command turns off its "the user hasn't heard from you" reminders and its sleep block (see README).
+mkdir -p "$A/.claude"
+printf '%s\n' '{"includeGitInstructions": false, "attribution": {"commit": "", "pr": ""}}' > "$A/.claude/settings.local.json"
+chmod 755 "$A/.claude"; chmod 644 "$A/.claude/settings.local.json"
 
 # The AI may not read the game's folder (old runs, notes, other prompts), except new screenshots and saves.
 as_player mkdir -p $B/user-data/screenshot $B/user-data/save
@@ -107,6 +113,14 @@ drawtext=fontfile=$SANS:textfile=/root/rec/header-goal.txt:reload=1:expansion=no
 drawtext=fontfile=$MONO:textfile=/root/rec/panel.txt:reload=1:expansion=none:fontcolor=0xe8e8e8:fontsize=14:line_spacing=4:x=1296:y=98[out]"
 fi
 rm -f /tmp/rct-panel.js /tmp/rct-panel.py
+# A full-width banner above everything with the scenario's whole goal, e.g. "Goal: Earn £1,000 or more from food
+# and drink sales in one game month. No deadline." (the task's goal text, without its bold marks).
+node -e 'let g="";try{g=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")).goal||""}catch(e){}
+require("fs").writeFileSync(process.argv[2],g?"Goal: "+g.replace(/\*\*/g,""):"")' /root/rec/info.json /root/rec/banner.txt
+if [ -s /root/rec/banner.txt ]; then
+    LAYOUT="${LAYOUT%\[out\]}[main];[main]pad=1920:776:0:56:color=0x0f1a24,\
+drawtext=fontfile=$SANS:textfile=/root/rec/banner.txt:expansion=none:fontcolor=white:fontsize=26:x=(w-text_w)/2:y=15[out]"
+fi
 setsid nohup ffmpeg -nostdin -loglevel error -f x11grab -framerate 10 -video_size 1280x720 -i :99 \
     "${PANEL_INPUT[@]}" -filter_complex "$LAYOUT" -map '[out]' \
     -c:v libx264 -preset ultrafast -crf 28 -pix_fmt yuv420p -y /root/rec/run.mkv >/root/rec/ffmpeg.log 2>&1 < /dev/null &

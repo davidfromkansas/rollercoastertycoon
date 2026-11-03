@@ -208,3 +208,96 @@ test('every reply carries the newest game messages, red ones marked as warnings'
     const reply = await g.request({ op: 'park' });
     assert.ok(Array.isArray(reply.recentNews));
 });
+
+test('a flat ride shows its station, entrance and exit even though its station length is 0', async () => {
+    const g = loadFakeGame();
+    const ride = g.sandbox.map.rides[0];
+    ride.stations = [
+        { start: { x: 320, y: 320, z: 112 }, length: 0, entrance: { x: 320, y: 352, z: 112, direction: 1 }, exit: { x: 352, y: 320, z: 112, direction: 2 }, queueTime: 0 },
+        { start: null, length: 0, entrance: null, exit: null, queueTime: 0 },
+    ];
+    const one = await g.request({ op: 'ride', args: { ride: 3 } });
+    assert.strictEqual(one.result.stations.length, 1);
+    assert.deepStrictEqual(one.result.stations[0].entrance, { x: 320, y: 352, z: 112, direction: 1 });
+    assert.deepStrictEqual(one.result.stations[0].exit, { x: 352, y: 320, z: 112, direction: 2 });
+    const all = await g.request({ op: 'rides' });
+    assert.strictEqual(all.result[0].stations.length, 1);
+});
+
+// A small park: a path from (5,5) east to (6,5), a ride entrance at (7,5) and an exit at (7,6) with no path to it.
+function smallPark(g) {
+    const tiles = {
+        '5,5': [{ type: 'surface', baseZ: 14, ownership: 2, grassLength: 5 },
+            { type: 'footpath', baseZ: 112, edges: 4, isQueue: false, addition: 0, isAdditionBroken: true, isAdditionFull: false, slopeDirection: null }],
+        '6,5': [{ type: 'surface', baseZ: 14, ownership: 8, grassLength: 0 },
+            { type: 'footpath', baseZ: 112, edges: 1 | 4, isQueue: true, addition: 1, isAdditionBroken: false, isAdditionFull: true, slopeDirection: 2 }],
+        '7,5': [{ type: 'surface', baseZ: 112, ownership: 2 }, { type: 'entrance', baseZ: 112, ride: 3, station: 0 }],
+        '7,6': [{ type: 'surface', baseZ: 112, ownership: 2 }, { type: 'entrance', baseZ: 112, ride: 3, station: 0 }],
+        '9,9': [{ type: 'surface', baseZ: 112, ownership: 2 }, { type: 'entrance', baseZ: 112, ride: 0, station: 0 }],
+        '8,8': [{ type: 'surface', baseZ: 14, ownership: 2 }, { type: 'small_scenery', baseZ: 14, object: 4, age: 45 }],
+    };
+    g.sandbox.map.getTile = (x, y) => ({ elements: tiles[x + ',' + y] || [{ type: 'surface', baseZ: 14, ownership: 0 }] });
+    g.sandbox.map.getAllEntities = type => (type === 'litter'
+        ? [{ x: 5 * 32 + 3, y: 5 * 32 + 9, litterType: 'vomit' }, { x: 5 * 32, y: 5 * 32, litterType: 'empty_can' },
+            { x: -32768, y: -32768, litterType: 'rubbish' }]
+        : []);
+    g.sandbox.objectManager.getObject = (type, index) => ({
+        'footpath_addition:0': { name: 'Bench', flags: 0 },
+        'footpath_addition:1': { name: 'Litter Bin', flags: 0 },
+        'small_scenery:4': { name: 'Flowers', flags: 1 << 5 },
+    })[type + ':' + index] || null;
+    const ride = g.sandbox.map.rides[0];
+    ride.stations = [{ start: { x: 256, y: 192, z: 112 }, length: 0,
+        entrance: { x: 7 * 32, y: 5 * 32, z: 112, direction: 0 }, exit: { x: 7 * 32, y: 6 * 32, z: 112, direction: 0 }, queueTime: 0 }];
+}
+
+test('tiles describe land, grass, path joins, path items and litter in words', async () => {
+    const g = loadFakeGame();
+    smallPark(g);
+    const reply = await g.request({ op: 'map', args: { x: 5, y: 5, width: 2, height: 1 } });
+    const [a, b] = reply.result;
+    assert.strictEqual(a.elements[0].land, 'owned');
+    assert.strictEqual(a.elements[0].grass, 'long');
+    assert.deepStrictEqual(a.elements[1].joinsTo, [[6, 5]]);
+    assert.deepStrictEqual(a.elements[1].item, { name: 'Bench', broken: true });
+    assert.deepStrictEqual(a.onTheGround, { litter: 1, vomit: 1 });
+    assert.strictEqual(b.elements[0].land, 'for sale');
+    assert.deepStrictEqual(b.elements[1].joinsTo, [[5, 5], [7, 5]]);
+    assert.deepStrictEqual(b.elements[1].slopesUpToward, [7, 5]);
+    assert.deepStrictEqual(b.elements[1].item, { name: 'Litter Bin', full: true });
+    const park = await g.request({ op: 'park' });
+    assert.strictEqual(park.result.park.litterOnGround, 1);
+    assert.strictEqual(park.result.park.vomitOnGround, 1);
+});
+
+test('a ride warns when its entrance or exit has no path to it', async () => {
+    const g = loadFakeGame();
+    smallPark(g);
+    const reply = await g.request({ op: 'ride', args: { ride: 3 } });
+    assert.deepStrictEqual(reply.result.warnings, ['The exit of station 0 is not joined to a path.']);
+});
+
+test('the park map draws path joins, entrances, exits and lists upkeep problems', async () => {
+    const g = loadFakeGame();
+    smallPark(g);
+    const reply = await g.request({ op: 'overview', args: { land: true } });
+    const r = reply.result;
+    assert.strictEqual(r.rows[5].slice(5, 8), '╶═E');
+    assert.strictEqual(r.rows[6][7], 'X');
+    assert.strictEqual(r.land[5].slice(5, 8), 'o$o');
+    assert.strictEqual(r.upkeep.vomit, 1);
+    assert.deepStrictEqual(r.upkeep.dirtiestTiles[0], { x: 5, y: 5, litter: 1, vomit: 1 });
+    assert.deepStrictEqual(r.upkeep.brokenPathItems, [{ x: 5, y: 5, item: 'Bench' }]);
+    assert.deepStrictEqual(r.upkeep.fullBins, [{ x: 6, y: 5 }]);
+    assert.deepStrictEqual(r.upkeep.wiltingGardens, [{ x: 8, y: 8 }]);
+    assert.strictEqual(r.upkeep.longGrassTiles, 1);
+    assert.strictEqual(r.problems.length, 1);
+    assert.match(r.problems[0], /exit of station 0 is not joined/);
+});
+
+test('the park map marks the park entrance apart from ride entrances', async () => {
+    const g = loadFakeGame();
+    smallPark(g);
+    const reply = await g.request({ op: 'overview', args: {} });
+    assert.strictEqual(reply.result.rows[9][9], 'P');
+});

@@ -88,7 +88,7 @@ You have a folder called `notebook/` (inside this folder) for your own notes, pl
 | Awards | `awards` |
 | Park statistics: size, rides, staff | `park`, `rides`, `staff` |
 | The scenario's fixed rules: whether guests pay to enter, pay for rides, or both; which prices you can change; and settings such as guests being harder to attract or preferring more intense rides | `park` → `park.rules` |
-| Looking at the park | `capture` takes a screenshot (saved in `screenshots/`, which you can open and look at); `view` points the camera; `map` reads the tiles |
+| Looking at the park | `overview` shows the whole park as a map, one character per tile, with its upkeep problems (litter, vomit, broken benches and lamps, full bins, wilting gardens, long grass) and ride entrances or exits not joined to a path; `map` reads single tiles in detail; `capture` takes a screenshot (saved in `screenshots/`, which you can open and look at); `view` points the camera |
 
 - Years run from March to October, since parks operate seasonally. Some goals have a deadline: watch the calendar.
 - The park rating reflects your guests' overall impression of ride design, park layout, tidiness, value, efficiency and more. It tells you *that* there is a problem, never *what* the problem is. Use `thoughts` and `news` to find out what.
